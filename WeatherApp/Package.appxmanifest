@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="8c7ba95e-559c-4c35-b8e3-64335227f0f9"
+    Name="654451f2-3da1-437b-867e-fe3afca69212"
     Publisher="CN=user"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="8c7ba95e-559c-4c35-b8e3-64335227f0f9" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="654451f2-3da1-437b-867e-fe3afca69212" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>WeatherApp</DisplayName>
