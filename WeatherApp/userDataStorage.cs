@@ -11,7 +11,7 @@ namespace WeatherApp
 {
     public class UserDataStorage
     {
-        private string userDataFileName = "userData.json";
+        private string userDataFileName = "userDataFile.json";
 
         public async void AddCity(City city)
         {
@@ -23,7 +23,7 @@ namespace WeatherApp
             StorageFile file = null ;
             
             //If the storage file does not exists yet
-            if (ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName) == null)
+            if (await ApplicationData.Current.LocalFolder.TryGetItemAsync(this.userDataFileName) == null)
             {
                 //Create new user data object
                 ud = new UserData();
@@ -63,9 +63,9 @@ namespace WeatherApp
             UserData ud = null;
             //File holder
             StorageFile file = null;
-
+            System.Diagnostics.Debug.WriteLine(ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName));
             //If the storage file does not exists yet
-            if (ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName) == null)
+            if (await ApplicationData.Current.LocalFolder.TryGetItemAsync(this.userDataFileName) == null)
             {
                 //Create new user data object
                 ud = new UserData();

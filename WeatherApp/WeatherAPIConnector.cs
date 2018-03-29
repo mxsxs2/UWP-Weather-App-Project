@@ -21,10 +21,10 @@ namespace WeatherApp
 
     class WeatherAPIConnector
     {
-        //Api key to connect to openweathermap.org
-        private const string apiKey = "fcc608c1525a74963b9fac6089af8515";
+        //Api key to connect to accuweather.com
+        private const string apiKey = "SxRlaYFLOygGB1Ium763sVMxQyPACAli";
         //The openweathermap api link
-        private const string URL = "https://api.openweathermap.org/data/2.5/";
+        private const string URL = "http://dataservice.accuweather.com/";
 
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace WeatherApp
         private async Task<T> DoQueryAsync<T>(string remoteFile,string queries)
         {
 
-            //System.Diagnostics.Debug.WriteLine(URL + remoteFile + queries + "&units=metric&APPID=" + apiKey);
+            System.Diagnostics.Debug.WriteLine(URL + remoteFile +"?"+ queries + "&apikey=" + apiKey);
 
             //Create a http client and add the base url
             HttpClient client = new HttpClient();
@@ -47,7 +47,7 @@ namespace WeatherApp
             new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Do the http response call with the query string and api key
-            HttpResponseMessage response = client.GetAsync(queries+ "&units=metric&APPID=" + apiKey).Result;
+            HttpResponseMessage response = client.GetAsync("?"+queries+ "&apikey=" + apiKey).Result;
             //If the response code is 200
             if (response.IsSuccessStatusCode)
             {
@@ -68,22 +68,36 @@ namespace WeatherApp
             throw new Exception(response.ReasonPhrase);
         }
 
-
-        public async void GetWetaherForCitiesAsync(List<City> cities,Func<CityWeatherList, bool> successCallBack, Func<string, bool> errorCallBack)
+        public async void GetCityListByAutoComplete(string search, Func<List<City>, bool> successCallBack, Func<string, bool> errorCallBack)
         {
-            //Base query string for the request
-            string queryString = "?id=";
-            //Get all the city ids
-            foreach(City c in cities)
+            try
             {
-                //Add the id to the string
-                queryString += c.id+",";
+                //Do the call to the server and pass it to a callback
+                successCallBack(await this.DoQueryAsync<List<City>>("locations/v1/cities/autocomplete", "q="+search));
             }
+            catch (Exception e)
+            {
+                //Do the call back with an error
+                errorCallBack(e.Message);
+            }
+        }
 
+
+
+
+
+        /// <summary>
+        /// Loads the weather information for a cities
+        /// </summary>
+        /// <param name="cityKey"></param>
+        /// <param name="successCallBack"></param>
+        /// <param name="errorCallBack"></param>
+        public async void GetWetaherForCityAsync(string cityKey,Func<CityWeather, bool> successCallBack, Func<string, bool> errorCallBack)
+        {
             try
             {   
                 //Do the call to the server and pass it to a callback
-                successCallBack(await this.DoQueryAsync<CityWeatherList>("group",queryString.TrimEnd(',')));
+                successCallBack((await this.DoQueryAsync<List<CityWeather>>("currentconditions/v1/locationKey", "locationKey="+cityKey))[0]);
             }
             catch(Exception e)
             {

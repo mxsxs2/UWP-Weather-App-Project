@@ -40,7 +40,7 @@ namespace WeatherApp
         {
             this.InitializeComponent();
             //Load every city from csv
-            this.LoadCities();
+            //this.LoadCities();
             //Load user data from data storage
             this.LoadUserData();
         }
@@ -98,60 +98,56 @@ namespace WeatherApp
         private void AddLocationTiles(List<City> cities)
         {
 
-            //Load the city data
-            this.WAC.GetWetaherForCitiesAsync(cities,
-                (cityList) => {
-                    //Clear the storage stack panel
-                    spCities.Children.Clear();
-                    //Loop the cityes
-                    foreach (CityWeather city in cityList.list)
+            //Clear the tile holder
+            spCities.Children.Clear();
+
+
+            //Loop al the cities in the list
+            foreach(City city in cities)
+            {
+
+                //Load the weather data for the city
+                this.WAC.GetWetaherForCityAsync(city.Key,
+                    (weather) =>
                     {
-
-
-                        /*
-                         <RelativePanel Height="200
-                           " Width="200">
-            <TextBlock FontSize="20" FontWeight="Bold" >Name</TextBlock>
-                <Image Height="60" Width="60" Margin="30,70" Source="ms-appx:///Assets/icons/01d.png"/>
-                <TextBlock FontSize="40" FontWeight="Bold" Margin="100,70,30,70">9°C</TextBlock>
-            <TextBlock FontSize="19" FontWeight="Bold" Margin="7,-50,7,0" RelativePanel.AlignBottomWithPanel="True"> Max 19°C / Min 10°C</TextBlock>
-        </RelativePanel>*/
+                        //Set the weather for the city
+                        city.weather = weather;
                         //Create new panel
                         RelativePanel panel = new RelativePanel();
                         panel.Height = 200;
                         panel.Width = 200;
                         panel.BorderThickness = new Thickness(2);
                         panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
-
+                        panel.Name = city.Key + "";
                         //Create tile content
                         //Add name
                         //Add temperature
                         TextBlock tbn = new TextBlock();
-                        tbn.Text = city.name;
+                        tbn.Text = city.LocalizedName;
                         tbn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
                         tbn.SetValue(RelativePanel.AlignTopWithPanelProperty, true);
                         tbn.FontSize = 22;
                         tbn.FontWeight = FontWeights.Bold;
                         panel.Children.Add(tbn);
-                        
+
 
                         //Add weather picture
                         Image img = new Image();
-                        img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/"+city.weather[0].icon+".png"));
-                        img.Margin = new Thickness(30, 65,0,0);
+                        img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + city.weather.WeatherIcon + ".png"));
+                        img.Margin = new Thickness(30, 65, 0, 0);
                         img.Width = 60;
                         img.Height = 60;
                         panel.Children.Add(img);
                         //Add temperature
                         TextBlock tb = new TextBlock();
-                        tb.Text = Math.Round(city.main.temp)+ "°C";
+                        tb.Text = Math.Round(city.weather.Temperature.Metric.Value) + "°C";
                         tb.Margin = new Thickness(90, 60, 10, 60);
                         tb.FontSize = 40;
                         tb.FontWeight = FontWeights.Bold;
                         panel.Children.Add(tb);
                         //Add temperature max min
                         TextBlock tbmn = new TextBlock();
-                        tbmn.Text = "Max "+city.main.temp_max+"°C / Min " + city.main.temp_min + "°C";
+                        tbmn.Text = city.weather.WeatherText;
                         tbmn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
                         tbmn.SetValue(RelativePanel.AlignBottomWithPanelProperty, true);
                         tbmn.Margin = new Thickness(7, -50, 7, 0);
@@ -160,15 +156,41 @@ namespace WeatherApp
                         panel.Children.Add(tbmn);
 
                         //Add mouse hover effect
-                        panel.PointerEntered += Panel_PointerEntered;
-                        panel.PointerExited += Panel_PointerExited;
+                        panel.PointerEntered += City_Tile_Panel_PointerEntered;
+                        panel.PointerExited += City_Tile_Panel_PointerExited;
+                        //Add tap event to the panel
+                        panel.Tapped += City_Tile_Panel_Tapped;
                         //Add to the parent stack panel
                         spCities.Children.Add(panel);
+                        return true;
+                    },
+                    (error) =>
+                    {
+                        System.Diagnostics.Debug.WriteLine(error);
+                        return true;
+                    });
+            }
+            //Add the city adding tile
+            this.AddCityAddingTile();
+        }
+
+        private void City_Tile_Panel_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+           /* //Load the city data
+            this.WAC.GetFiveDaysForecastForCityAsync(Convert.ToInt32(((RelativePanel)sender).Name),
+                (forecast) => {
+                    //Clear the storage stack panel
+                    spCities.Children.Clear();
+                    //Loop the cityes
+                    foreach (List list in forecast.list)
+                    {
+                        System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                        dtDateTime = dtDateTime.AddSeconds(list.dt).ToLocalTime();
+                        System.Diagnostics.Debug.WriteLine(dtDateTime.DayOfWeek);
                     }
-                    this.AddCityAddingTile();
                     return true;
                 },
-                (error)=>
+                (error) =>
                 {
                     //Create tile content
                     TextBlock tb = new TextBlock();
@@ -181,7 +203,7 @@ namespace WeatherApp
                     //Add to the parent stack panel
                     spCities.Children.Add(panel);
                     return true;
-                });
+                });*/
         }
 
         /// <summary>
@@ -189,7 +211,7 @@ namespace WeatherApp
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Panel_PointerExited(object sender, PointerRoutedEventArgs e)
+        private void City_Tile_Panel_PointerExited(object sender, PointerRoutedEventArgs e)
         {
             RelativePanel p = (RelativePanel)sender;
             p.Background= new SolidColorBrush(Colors.White);
@@ -200,66 +222,13 @@ namespace WeatherApp
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Panel_PointerEntered(object sender, PointerRoutedEventArgs e)
+        private void City_Tile_Panel_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
             RelativePanel p = (RelativePanel)sender;
             p.Background = new SolidColorBrush(Colors.Aqua);
             Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Hand, 0);
         }
-
-        /// <summary>
-        /// Loads every city from a a csv file and adds the to the global city list
-        /// </summary>
-        public async void LoadCities()
-        {
-            //CsvParse.cs file from https://github.com/matthiasxc/uwp-kickstart to parse the file
-            //Stream str =  new FileStream("data/city-list.scv", FileMode.Open, FileAccess.Read);
-            var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/city_list.csv"));
-            using (var inputStream = await file.OpenReadAsync())
-            using (var classicStream = inputStream.AsStreamForRead())
-            using (WeatherApp.CsvFileReader csvReader = new WeatherApp.CsvFileReader(classicStream))
-            {
-                //Create a new empty city holder
-                City city = null;
-                WeatherApp.CsvRow row = new WeatherApp.CsvRow();
-                while (csvReader.ReadRow(row))
-                {
-                    //Create an empty city
-                    city = new City();
-
-                    // add the columns one at a time
-                    for (int i = 0; i < row.Count; i++)
-                    {
-                        
-                        //Parse the data into the city
-                        if (i == 0)
-                        {
-                            city.id = Int32.Parse(row[i]);
-                        }
-                        else if(i == 1)
-                        {
-                            city.name = row[i];
-                        }
-                        else if (i == 2)
-                        {
-                            city.latitude = Double.Parse(row[i]);
-                        }
-                        else if (i == 3)
-                        {
-                            city.longitude = Double.Parse(row[i]);
-                        }
-                        else if (i == 4)
-                        {
-                            city.countrycode = row[i];
-                        }
-                        
-                    }
-                    
-                    //Add to the list
-                    this.cities.Add(city);
-                }
-            }
-        }
+       
 
         /// <summary>
         /// Opens up the city choser fly out when the add button is tapped
@@ -299,6 +268,30 @@ namespace WeatherApp
         {
             //Hide the fly out
             fpFlyoutDetails.Visibility = Visibility.Collapsed;
+        }
+
+        private void tbxCitySearch_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            //Cast the sender
+            TextBox tb = (TextBox)sender;
+            //Dont search unles there is atleast three characters
+            if (tb.Text.Length > 2)
+            {
+                //Load the cities
+                WAC.GetCityListByAutoComplete(tb.Text,
+                    (Cities) => {
+                        //Set the new city list
+                        this.cities = Cities;
+                        //Update the view
+                        lvCities.ItemsSource = Cities;
+                        return true;
+                    },
+                    (error) =>
+                    {
+                        System.Diagnostics.Debug.WriteLine(error);
+                        return true;
+                    });
+            }
         }
     }
 }

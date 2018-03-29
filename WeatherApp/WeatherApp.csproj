@@ -96,9 +96,8 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="CsvParse.cs" />
-    <Compile Include="DataModel\City.cs" />
+    <Compile Include="DataModel\CitySearch.cs" />
     <Compile Include="DataModel\CityWeather.cs" />
-    <Compile Include="DataModel\CityWeatherList.cs" />
     <Compile Include="DataModel\UserData.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -111,57 +110,46 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="Assets\icons\01d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\01n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\02d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\02n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\03d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\03n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\04d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\04n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\09d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\09n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\10d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\10n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\11d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\11n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\13d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\13n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\icons\50d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Assets\icons\1.png" />
+    <Content Include="Assets\icons\11.png" />
+    <Content Include="Assets\icons\12.png" />
+    <Content Include="Assets\icons\13.png" />
+    <Content Include="Assets\icons\14.png" />
+    <Content Include="Assets\icons\15.png" />
+    <Content Include="Assets\icons\16.png" />
+    <Content Include="Assets\icons\17.png" />
+    <Content Include="Assets\icons\18.png" />
+    <Content Include="Assets\icons\19.png" />
+    <Content Include="Assets\icons\2.png" />
+    <Content Include="Assets\icons\20.png" />
+    <Content Include="Assets\icons\21.png" />
+    <Content Include="Assets\icons\22.png" />
+    <Content Include="Assets\icons\23.png" />
+    <Content Include="Assets\icons\24.png" />
+    <Content Include="Assets\icons\25.png" />
+    <Content Include="Assets\icons\26.png" />
+    <Content Include="Assets\icons\29.png" />
+    <Content Include="Assets\icons\3.png" />
+    <Content Include="Assets\icons\30.png" />
+    <Content Include="Assets\icons\31.png" />
+    <Content Include="Assets\icons\32.png" />
+    <Content Include="Assets\icons\33.png" />
+    <Content Include="Assets\icons\34.png" />
+    <Content Include="Assets\icons\35.png" />
+    <Content Include="Assets\icons\36.png" />
+    <Content Include="Assets\icons\37.png" />
+    <Content Include="Assets\icons\38.png" />
+    <Content Include="Assets\icons\39.png" />
+    <Content Include="Assets\icons\4.png" />
+    <Content Include="Assets\icons\40.png" />
+    <Content Include="Assets\icons\41.png" />
+    <Content Include="Assets\icons\42.png" />
+    <Content Include="Assets\icons\43.png" />
+    <Content Include="Assets\icons\44.png" />
+    <Content Include="Assets\icons\5.png" />
+    <Content Include="Assets\icons\6.png" />
+    <Content Include="Assets\icons\7.png" />
+    <Content Include="Assets\icons\8.png" />
     <Content Include="Data\city_list.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

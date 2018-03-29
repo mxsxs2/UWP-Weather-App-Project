@@ -10,9 +10,9 @@
     <Page.Resources>
         <DataTemplate x:Key="cityTemplate">
             <StackPanel Margin="2,4,2,4" Tapped="StackPanel_Tapped">
-                <TextBlock Text="{Binding Path=name}" 
+                <TextBlock Text="{Binding Path=LocalizedName}" 
                                        Style="{StaticResource TitleTextBlockStyle}" />
-                <TextBlock Text="{Binding Path=countrycode}" 
+                <TextBlock Text="{Binding Path=Country.ID}" 
                                        Style="{StaticResource SubtitleTextBlockStyle}" />
             </StackPanel>
         </DataTemplate>
@@ -20,6 +20,9 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel  Width="2000" x:Name="spCities" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Orientation="Horizontal" Height="200" VerticalAlignment="Top"/>
+        <StackPanel  Width="2000" x:Name="spForecastDays" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Orientation="Horizontal" Height="500" Margin="0,200,0,0">
+            
+        </StackPanel>
 
         <Rectangle Opacity="0.5" Fill="Black" Visibility="{Binding Visibility,ElementName=fpFlyoutDetails}"/>
         <FlyoutPresenter  Width="330"
@@ -32,6 +35,7 @@
                 <TextBlock Text="Select city" HorizontalAlignment="Center" 
                    Style="{StaticResource TitleTextBlockStyle}"
                    x:Name="tblTitle" />
+                <TextBox x:Name="tbxCitySearch" Text="TextBox" KeyDown="tbxCitySearch_KeyDown"/>
                 <ListView x:Name="lvCities" 
                       BorderBrush="Blue" BorderThickness="3"
                       Height="300"
