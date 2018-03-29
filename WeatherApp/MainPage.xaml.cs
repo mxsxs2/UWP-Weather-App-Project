@@ -8,12 +8,14 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -105,14 +107,58 @@ namespace WeatherApp
                     foreach (CityWeather city in cityList.list)
                     {
 
-                        //Create tile content
-                        TextBlock tb = new TextBlock();
-                        tb.Text = city.name + "," + city.main.temp;
-                        tb.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
-                        tb.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
 
+                        /*
+                         <RelativePanel Height="200
+                           " Width="200">
+            <TextBlock FontSize="20" FontWeight="Bold" >Name</TextBlock>
+                <Image Height="60" Width="60" Margin="30,70" Source="ms-appx:///Assets/icons/01d.png"/>
+                <TextBlock FontSize="40" FontWeight="Bold" Margin="100,70,30,70">9°C</TextBlock>
+            <TextBlock FontSize="19" FontWeight="Bold" Margin="7,-50,7,0" RelativePanel.AlignBottomWithPanel="True"> Max 19°C / Min 10°C</TextBlock>
+        </RelativePanel>*/
                         //Create new panel
-                        RelativePanel panel = this.CreatePanelForTile(tb);
+                        RelativePanel panel = new RelativePanel();
+                        panel.Height = 200;
+                        panel.Width = 200;
+                        panel.BorderThickness = new Thickness(2);
+                        panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
+
+                        //Create tile content
+                        //Add name
+                        //Add temperature
+                        TextBlock tbn = new TextBlock();
+                        tbn.Text = city.name;
+                        tbn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
+                        tbn.SetValue(RelativePanel.AlignTopWithPanelProperty, true);
+                        tbn.FontSize = 22;
+                        tbn.FontWeight = FontWeights.Bold;
+                        panel.Children.Add(tbn);
+                        
+
+                        //Add weather picture
+                        Image img = new Image();
+                        img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/"+city.weather[0].icon+".png"));
+                        img.Margin = new Thickness(30, 65,0,0);
+                        img.Width = 60;
+                        img.Height = 60;
+                        panel.Children.Add(img);
+                        //Add temperature
+                        TextBlock tb = new TextBlock();
+                        tb.Text = Math.Round(city.main.temp)+ "°C";
+                        tb.Margin = new Thickness(90, 60, 10, 60);
+                        tb.FontSize = 40;
+                        tb.FontWeight = FontWeights.Bold;
+                        panel.Children.Add(tb);
+                        //Add temperature max min
+                        TextBlock tbmn = new TextBlock();
+                        tbmn.Text = "Max "+city.main.temp_max+"°C / Min " + city.main.temp_min + "°C";
+                        tbmn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
+                        tbmn.SetValue(RelativePanel.AlignBottomWithPanelProperty, true);
+                        tbmn.Margin = new Thickness(7, -50, 7, 0);
+                        tbmn.FontSize = 19;
+                        tbmn.FontWeight = FontWeights.Bold;
+                        panel.Children.Add(tbmn);
+
                         //Add mouse hover effect
                         panel.PointerEntered += Panel_PointerEntered;
                         panel.PointerExited += Panel_PointerExited;

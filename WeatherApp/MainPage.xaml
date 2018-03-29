@@ -19,19 +19,8 @@
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <ListView   x:Name="lvOwnCities" ScrollViewer.HorizontalScrollMode="Auto" 
-                   ScrollViewer.HorizontalScrollBarVisibility="Auto" 
-                   ScrollViewer.IsHorizontalRailEnabled="True" Height="200">
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
+        <StackPanel  Width="2000" x:Name="spCities" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Orientation="Horizontal" Height="200" VerticalAlignment="Top"/>
 
-        </ListView>
-        <ScrollViewer x:Name="scvCities" HorizontalScrollMode="Enabled" HorizontalScrollBarVisibility="Visible"  Width="{Binding ScreenWidth}">
-            <StackPanel  Width="2000" x:Name="spCities" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Orientation="Horizontal" Height="200" VerticalAlignment="Top"/>
-        </ScrollViewer>
         <Rectangle Opacity="0.5" Fill="Black" Visibility="{Binding Visibility,ElementName=fpFlyoutDetails}"/>
         <FlyoutPresenter  Width="330"
                          Height="500" x:Name="fpFlyoutDetails"
