@@ -31,6 +31,8 @@ namespace WeatherApp
         private List<City> userCities = new List<City>();
         //Data storage class
         private UserDataStorage userDataStorage = new UserDataStorage();
+        //Weather api conncetor
+        private WeatherAPIConnector WAC = new WeatherAPIConnector();
 
         public MainPage()
         {
@@ -58,10 +60,7 @@ namespace WeatherApp
             
         }
 
-        /// <summary>
-        /// Adds the city adding tile to the list of cities
-        /// </summary>
-        private void AddCityAddingTile()
+        private RelativePanel CreatePanelForTile(Windows.UI.Xaml.UIElement content)
         {
             //Create new panel
             RelativePanel panel = new RelativePanel();
@@ -69,11 +68,23 @@ namespace WeatherApp
             panel.Width = 200;
             panel.BorderThickness = new Thickness(2);
             panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
+            panel.Children.Add(content);
+            return panel;
+        }
+
+        /// <summary>
+        /// Adds the city adding tile to the list of cities
+        /// </summary>
+        private void AddCityAddingTile()
+        {
+            //Create tile content
             TextBlock tb = new TextBlock();
             tb.Text = "Add";
             tb.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
             tb.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
-            panel.Children.Add(tb);
+
+            //Create new panel
+            RelativePanel panel = this.CreatePanelForTile(tb);
             panel.Tapped += this.rlpAddLocation_Tapped;
             spCities.Children.Add(panel);
         }
@@ -84,31 +95,47 @@ namespace WeatherApp
         /// <param name="cities"></param>
         private void AddLocationTiles(List<City> cities)
         {
-            //Clear the storage stack panel
-            spCities.Children.Clear();
-            //Loop the cityes
-            foreach(City city in cities)
-            {
-                //Create new panel
-                RelativePanel panel = new RelativePanel();
-                panel.Height = 200;
-                panel.Width = 200;
-                panel.BorderThickness = new Thickness(2);
-                panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
-                //Add a text block into the relative panel 
-                TextBlock tb =new TextBlock();
-                tb.Text = city.name + "," + city.countrycode;
-                tb.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
-                tb.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
-                panel.Children.Add(tb);
-                //Add mouse hover effect
-                panel.PointerEntered += Panel_PointerEntered;
-                panel.PointerExited += Panel_PointerExited;
-                //Add to the parent stack panel
-                spCities.Children.Add(panel);
-            }
 
-            this.AddCityAddingTile();
+            //Load the city data
+            this.WAC.GetWetaherForCitiesAsync(cities,
+                (cityList) => {
+                    //Clear the storage stack panel
+                    spCities.Children.Clear();
+                    //Loop the cityes
+                    foreach (CityWeather city in cityList.list)
+                    {
+
+                        //Create tile content
+                        TextBlock tb = new TextBlock();
+                        tb.Text = city.name + "," + city.main.temp;
+                        tb.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
+                        tb.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
+
+                        //Create new panel
+                        RelativePanel panel = this.CreatePanelForTile(tb);
+                        //Add mouse hover effect
+                        panel.PointerEntered += Panel_PointerEntered;
+                        panel.PointerExited += Panel_PointerExited;
+                        //Add to the parent stack panel
+                        spCities.Children.Add(panel);
+                    }
+                    this.AddCityAddingTile();
+                    return true;
+                },
+                (error)=>
+                {
+                    //Create tile content
+                    TextBlock tb = new TextBlock();
+                    tb.Text = "Could not load weather data";
+                    tb.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
+                    tb.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
+
+                    //Create new panel
+                    RelativePanel panel = this.CreatePanelForTile(tb);
+                    //Add to the parent stack panel
+                    spCities.Children.Add(panel);
+                    return true;
+                });
         }
 
         /// <summary>
