@@ -97,13 +97,14 @@
     </Compile>
     <Compile Include="CsvParse.cs" />
     <Compile Include="DataModel\City.cs" />
+    <Compile Include="DataModel\CityWeather.cs" />
     <Compile Include="DataModel\UserData.cs" />
-    <Compile Include="DataObject.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserDataStorage.cs" />
+    <Compile Include="WeatherAPIConnector.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -135,6 +136,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client">
+      <Version>5.2.4</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.0.6</Version>
     </PackageReference>

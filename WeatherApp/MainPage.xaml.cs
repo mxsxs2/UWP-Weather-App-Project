@@ -39,7 +39,6 @@ namespace WeatherApp
             this.LoadCities();
             //Load user data from data storage
             this.LoadUserData();
-            
         }
 
         /// <summary>
@@ -53,8 +52,6 @@ namespace WeatherApp
                 this.userCities = data.cities;
                 //Load the city tiles from the user data
                 this.AddLocationTiles(this.userCities);
-                //User data is loaded
-                System.Diagnostics.Debug.WriteLine(data.cities.Count);
                 return true;
             });
             
