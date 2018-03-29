@@ -98,6 +98,7 @@
     <Compile Include="CsvParse.cs" />
     <Compile Include="DataModel\City.cs" />
     <Compile Include="DataModel\UserData.cs" />
+    <Compile Include="DataObject.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
