@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using WeatherApp.DataModel;
+using WeatherApp.DataModel.Forecast5Day;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
@@ -56,6 +57,8 @@ namespace WeatherApp
                 this.userCities = data.cities;
                 //Load the city tiles from the user data
                 this.AddLocationTiles(this.userCities);
+                //Load forecast for the default city
+                this.LoadForecastForCity(this.userCities[0].Key);
                 return true;
             });
             
@@ -169,42 +172,135 @@ namespace WeatherApp
                         System.Diagnostics.Debug.WriteLine(error);
                         return true;
                     });
+                break;
             }
             //Add the city adding tile
             this.AddCityAddingTile();
         }
 
-        private void City_Tile_Panel_Tapped(object sender, TappedRoutedEventArgs e)
+        /// <summary>
+        /// Loads the forecast for a specific city
+        /// </summary>
+        /// <param name="cityKey"></param>
+        private void LoadForecastForCity(string cityKey)
         {
-           /* //Load the city data
-            this.WAC.GetFiveDaysForecastForCityAsync(Convert.ToInt32(((RelativePanel)sender).Name),
+            //Load the city data
+            this.WAC.Get5DayForecastForCityAsync(cityKey,
                 (forecast) => {
-                    //Clear the storage stack panel
-                    spCities.Children.Clear();
-                    //Loop the cityes
-                    foreach (List list in forecast.list)
+                    //Clear the storage grid
+                    spForecastDays.Children.Clear();
+                    //Day counter
+                    int column = 0;
+                    //Loop the days
+                    foreach (DailyForecast day in forecast.DailyForecasts)
                     {
-                        System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-                        dtDateTime = dtDateTime.AddSeconds(list.dt).ToLocalTime();
-                        System.Diagnostics.Debug.WriteLine(dtDateTime.DayOfWeek);
+                        this.AddDayPanel(day, column);
+                        column++;
                     }
                     return true;
                 },
                 (error) =>
                 {
+
+                    //Clear the storage grid
+                    spForecastDays.Children.Clear();
                     //Create tile content
                     TextBlock tb = new TextBlock();
                     tb.Text = "Could not load weather data";
-                    tb.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
-                    tb.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
-
-                    //Create new panel
-                    RelativePanel panel = this.CreatePanelForTile(tb);
-                    //Add to the parent stack panel
-                    spCities.Children.Add(panel);
+                    tb.HorizontalAlignment = HorizontalAlignment.Center;
+                    tb.VerticalAlignment = VerticalAlignment.Center;
+                    Grid.SetColumnSpan(tb, 5);
+                    Grid.SetRowSpan(tb, 3);
+                    //Add to the parent grid
+                    spForecastDays.Children.Add(tb);
                     return true;
-                });*/
+                });
         }
+
+        /// <summary>
+        /// Loads the forecast for the given day when a tile is tapped
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void City_Tile_Panel_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.LoadForecastForCity(((RelativePanel)sender).Name);
+        }
+
+        /// <summary>
+        /// Adds a day panel into the forecast grid
+        /// </summary>
+        /// <param name="day"></param>
+        /// <param name="col"></param>
+        private void AddDayPanel(DailyForecast day, int col)
+        {
+            //Get day name from epoch time
+            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dtDateTime = dtDateTime.AddSeconds(day.EpochDate).ToLocalTime();
+            System.Diagnostics.Debug.WriteLine(dtDateTime.DayOfWeek);
+            //Create day name
+            TextBlock tbn = new TextBlock();
+            tbn.Text = dtDateTime.DayOfWeek.ToString();
+            tbn.HorizontalAlignment = HorizontalAlignment.Center;
+            tbn.VerticalAlignment = VerticalAlignment.Center;
+            tbn.FontSize = 20;
+            tbn.FontWeight = FontWeights.Bold;
+            spForecastDays.Children.Add(tbn);
+            Grid.SetColumn(tbn, col);
+            Grid.SetRow(tbn, 0);
+
+            //Create stackpanels for day/night pictures
+            StackPanel panel = new StackPanel();
+            StackPanel dayPanel = new StackPanel();
+            dayPanel.Orientation = Orientation.Horizontal;
+            StackPanel nightPanel = new StackPanel();
+            nightPanel.Orientation = Orientation.Horizontal;
+            panel.Children.Add(dayPanel);
+            panel.Children.Add(nightPanel);
+            spForecastDays.Children.Add(panel);
+            Grid.SetColumn(panel, col);
+            Grid.SetRow(panel, 1);
+            //Day
+            TextBlock tbd = new TextBlock();
+            tbd.Text = "Day";
+            tbd.HorizontalAlignment = HorizontalAlignment.Center;
+            tbd.VerticalAlignment = VerticalAlignment.Center;
+            tbd.FontSize = 18;
+            tbd.FontWeight = FontWeights.Bold;
+            dayPanel.Children.Add(tbd);
+            //Day Picture
+            Image img = new Image();
+            img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + day.Day.Icon + ".png"));
+            img.Width = 60;
+            img.Height = 60;
+            dayPanel.Children.Add(img);
+            //Night
+            TextBlock tbni = new TextBlock();
+            tbni.Text = "Night";
+            tbni.HorizontalAlignment = HorizontalAlignment.Center;
+            tbni.VerticalAlignment = VerticalAlignment.Center;
+            tbni.FontSize = 18;
+            tbni.FontWeight = FontWeights.Bold;
+            nightPanel.Children.Add(tbni);
+            //DayPicture
+            Image img2 = new Image();
+            img2.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + day.Night.Icon + ".png"));
+            img2.Width = 60;
+            img2.Height = 60;
+            nightPanel.Children.Add(img2);
+
+            //Min/Max temperatures
+            //Add temperature
+            TextBlock tbt = new TextBlock();
+            tbt.Text = "Min " + Math.Round(day.Temperature.Minimum.Value) + "°C / Max " + Math.Round(day.Temperature.Maximum.Value) + "°C";
+            tbt.Margin = new Thickness(90, 60, 10, 60);
+            tbt.FontSize = 15;
+            tbt.FontWeight = FontWeights.Bold;
+            spForecastDays.Children.Add(tbt);
+            Grid.SetColumn(tbt, col);
+            Grid.SetRow(tbt, 2);
+        }
+
 
         /// <summary>
         /// Sets the background of the city tile to white and the cursor to the original arrow

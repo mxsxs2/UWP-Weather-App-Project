@@ -19,10 +19,28 @@
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <StackPanel  Width="2000" x:Name="spCities" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Orientation="Horizontal" Height="200" VerticalAlignment="Top"/>
-        <StackPanel  Width="2000" x:Name="spForecastDays" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Orientation="Horizontal" Height="500" Margin="0,200,0,0">
-            
-        </StackPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel  Width="2000" x:Name="spCities" Grid.Column="0" Grid.Row="0"   Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Orientation="Horizontal" Height="200" VerticalAlignment="Top"/>
+        <Grid  x:Name="spForecastDays"  Grid.Column="0" Grid.Row="1" Margin="10,10" Background="#FFE86C6C">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
+        </Grid>
 
         <Rectangle Opacity="0.5" Fill="Black" Visibility="{Binding Visibility,ElementName=fpFlyoutDetails}"/>
         <FlyoutPresenter  Width="330"

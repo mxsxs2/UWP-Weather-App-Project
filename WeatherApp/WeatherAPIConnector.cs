@@ -9,6 +9,7 @@ using WeatherApp.DataModel;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using Newtonsoft.Json;
+using WeatherApp.DataModel.Forecast5Day;
 
 namespace WeatherApp
 {
@@ -87,7 +88,7 @@ namespace WeatherApp
 
 
         /// <summary>
-        /// Loads the weather information for a cities
+        /// Loads the weather information for a city
         /// </summary>
         /// <param name="cityKey"></param>
         /// <param name="successCallBack"></param>
@@ -95,7 +96,7 @@ namespace WeatherApp
         public async void GetWetaherForCityAsync(string cityKey,Func<CityWeather, bool> successCallBack, Func<string, bool> errorCallBack)
         {
             try
-            {   
+            {
                 //Do the call to the server and pass it to a callback
                 successCallBack((await this.DoQueryAsync<List<CityWeather>>("currentconditions/v1/locationKey", "locationKey="+cityKey))[0]);
             }
@@ -105,6 +106,25 @@ namespace WeatherApp
                 errorCallBack(e.Message);
             }
             
+        }
+        /// <summary>
+        /// Loads 5 day forecast for a city
+        /// </summary>
+        /// <param name="cityKey"></param>
+        /// <param name="successCallBack"></param>
+        /// <param name="errorCallBack"></param>
+        public async void Get5DayForecastForCityAsync(string cityKey, Func<Forecast5Day, bool> successCallBack, Func<string, bool> errorCallBack)
+        {
+            try
+            {
+                //Do the call to the server and pass it to a callback
+                successCallBack((await this.DoQueryAsync<Forecast5Day>("forecasts/v1/daily/5day/" + cityKey, "locationKey=" + cityKey)));
+            }
+            catch (Exception e)
+            {
+                //Do the call back with an error
+                errorCallBack(e.Message);
+            }
         }
     }
 }
