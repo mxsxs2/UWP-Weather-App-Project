@@ -65,18 +65,6 @@ namespace WeatherApp
             
         }
 
-        private RelativePanel CreatePanelForTile(Windows.UI.Xaml.UIElement content)
-        {
-            //Create new panel
-            RelativePanel panel = new RelativePanel();
-            panel.Height = 200;
-            panel.Width = 200;
-            panel.BorderThickness = new Thickness(2);
-            panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
-            panel.Children.Add(content);
-            return panel;
-        }
-
         /// <summary>
         /// Adds the city adding tile to the list of cities
         /// </summary>
@@ -89,7 +77,13 @@ namespace WeatherApp
             tb.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
 
             //Create new panel
-            RelativePanel panel = this.CreatePanelForTile(tb);
+            RelativePanel panel = new RelativePanel();
+            panel.Height = 200;
+            panel.Width = 200;
+            panel.Margin = new Thickness(5);
+            panel.BorderThickness = new Thickness(2);
+            panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
+            panel.Children.Add(tb);
             panel.Tapped += this.rlpAddLocation_Tapped;
             spCities.Children.Add(panel);
         }
@@ -119,6 +113,7 @@ namespace WeatherApp
                         RelativePanel panel = new RelativePanel();
                         panel.Height = 200;
                         panel.Width = 200;
+                        panel.Margin = new Thickness(5);
                         panel.BorderThickness = new Thickness(2);
                         panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
                         panel.Name = city.Key + "";
@@ -130,6 +125,7 @@ namespace WeatherApp
                         tbn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
                         tbn.SetValue(RelativePanel.AlignTopWithPanelProperty, true);
                         tbn.FontSize = 22;
+                        tbn.Foreground = new SolidColorBrush(Colors.White);
                         tbn.FontWeight = FontWeights.Bold;
                         panel.Children.Add(tbn);
 
@@ -146,6 +142,7 @@ namespace WeatherApp
                         tb.Text = Math.Round(city.weather.Temperature.Metric.Value) + "°C";
                         tb.Margin = new Thickness(90, 60, 10, 60);
                         tb.FontSize = 40;
+                        tb.Foreground = new SolidColorBrush(Colors.White);
                         tb.FontWeight = FontWeights.Bold;
                         panel.Children.Add(tb);
                         //Add temperature max min
@@ -155,6 +152,7 @@ namespace WeatherApp
                         tbmn.SetValue(RelativePanel.AlignBottomWithPanelProperty, true);
                         tbmn.Margin = new Thickness(7, -50, 7, 0);
                         tbmn.FontSize = 19;
+                        tbmn.Foreground = new SolidColorBrush(Colors.White);
                         tbmn.FontWeight = FontWeights.Bold;
                         panel.Children.Add(tbmn);
 
@@ -244,6 +242,7 @@ namespace WeatherApp
             tbn.HorizontalAlignment = HorizontalAlignment.Center;
             tbn.VerticalAlignment = VerticalAlignment.Center;
             tbn.FontSize = 20;
+            tbn.Foreground = new SolidColorBrush(Colors.White);
             tbn.FontWeight = FontWeights.Bold;
             spForecastDays.Children.Add(tbn);
             Grid.SetColumn(tbn, col);
@@ -253,8 +252,10 @@ namespace WeatherApp
             StackPanel panel = new StackPanel();
             StackPanel dayPanel = new StackPanel();
             dayPanel.Orientation = Orientation.Horizontal;
+            dayPanel.HorizontalAlignment = HorizontalAlignment.Center;
             StackPanel nightPanel = new StackPanel();
             nightPanel.Orientation = Orientation.Horizontal;
+            nightPanel.HorizontalAlignment = HorizontalAlignment.Center;
             panel.Children.Add(dayPanel);
             panel.Children.Add(nightPanel);
             spForecastDays.Children.Add(panel);
@@ -262,10 +263,11 @@ namespace WeatherApp
             Grid.SetRow(panel, 1);
             //Day
             TextBlock tbd = new TextBlock();
-            tbd.Text = "Day";
+            tbd.Text = "Day  ";
             tbd.HorizontalAlignment = HorizontalAlignment.Center;
             tbd.VerticalAlignment = VerticalAlignment.Center;
             tbd.FontSize = 18;
+            tbd.Foreground = new SolidColorBrush(Colors.White);
             tbd.FontWeight = FontWeights.Bold;
             dayPanel.Children.Add(tbd);
             //Day Picture
@@ -280,6 +282,7 @@ namespace WeatherApp
             tbni.HorizontalAlignment = HorizontalAlignment.Center;
             tbni.VerticalAlignment = VerticalAlignment.Center;
             tbni.FontSize = 18;
+            tbni.Foreground = new SolidColorBrush(Colors.White);
             tbni.FontWeight = FontWeights.Bold;
             nightPanel.Children.Add(tbni);
             //DayPicture
@@ -293,8 +296,9 @@ namespace WeatherApp
             //Add temperature
             TextBlock tbt = new TextBlock();
             tbt.Text = "Min " + Math.Round(day.Temperature.Minimum.Value) + "°C / Max " + Math.Round(day.Temperature.Maximum.Value) + "°C";
-            tbt.Margin = new Thickness(90, 60, 10, 60);
+            tbt.HorizontalAlignment = HorizontalAlignment.Center;
             tbt.FontSize = 15;
+            tbt.Foreground = new SolidColorBrush(Colors.White);
             tbt.FontWeight = FontWeights.Bold;
             spForecastDays.Children.Add(tbt);
             Grid.SetColumn(tbt, col);
