@@ -109,68 +109,19 @@ namespace WeatherApp
                     {
                         //Set the weather for the city
                         city.Weather = weather;
-                        //Create new panel
-                        RelativePanel panel = new RelativePanel();
-                        panel.Height = 200;
-                        panel.Width = 200;
-                        panel.Margin = new Thickness(5);
-                        panel.BorderThickness = new Thickness(2);
-                        panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
-                        panel.Name = city.Key + "";
-                        //Create tile content
-                        //Add name
-                        //Add temperature
-                        TextBlock tbn = new TextBlock();
-                        tbn.Text = city.LocalizedName;
-                        tbn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
-                        tbn.SetValue(RelativePanel.AlignTopWithPanelProperty, true);
-                        tbn.FontSize = 22;
-                        tbn.Foreground = new SolidColorBrush(Colors.White);
-                        tbn.FontWeight = FontWeights.Bold;
-                        panel.Children.Add(tbn);
-
-
-                        //Add weather picture
-                        Image img = new Image();
-                        img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + city.Weather.WeatherIcon + ".png"));
-                        img.Margin = new Thickness(30, 65, 0, 0);
-                        img.Width = 60;
-                        img.Height = 60;
-                        panel.Children.Add(img);
-                        //Add temperature
-                        TextBlock tb = new TextBlock();
-                        tb.Text = Math.Round(city.Weather.Temperature.Metric.Value) + "°C";
-                        tb.Margin = new Thickness(90, 60, 10, 60);
-                        tb.FontSize = 40;
-                        tb.Foreground = new SolidColorBrush(Colors.White);
-                        tb.FontWeight = FontWeights.Bold;
-                        panel.Children.Add(tb);
-                        //Add temperature max min
-                        TextBlock tbmn = new TextBlock();
-                        tbmn.Text = city.Weather.WeatherText;
-                        tbmn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
-                        tbmn.SetValue(RelativePanel.AlignBottomWithPanelProperty, true);
-                        tbmn.Margin = new Thickness(7, -50, 7, 0);
-                        tbmn.FontSize = 19;
-                        tbmn.Foreground = new SolidColorBrush(Colors.White);
-                        tbmn.FontWeight = FontWeights.Bold;
-                        panel.Children.Add(tbmn);
-
-                        //Add mouse hover effect
-                        panel.PointerEntered += City_Tile_Panel_PointerEntered;
-                        panel.PointerExited += City_Tile_Panel_PointerExited;
-                        //Add tap event to the panel
-                        panel.Tapped += City_Tile_Panel_Tapped;
-                        //Add to the parent stack panel
-                        spCities.Children.Add(panel);
                         //Add timestamp to the city
                         city.LastUpdated = DateTime.Now;
+                        //Add the tile
+                        this.AddCityTile(city);
                         //Save the city to the storage
                         this.userDataStorage.SaveCity(city);
                         return true;
                     },
                     (error) =>
                     {
+                        //Add the tile with the old data
+                        this.AddCityTile(city);
+
                         System.Diagnostics.Debug.WriteLine(error);
                         return true;
                     });
@@ -178,6 +129,68 @@ namespace WeatherApp
             }
             //Add the city adding tile
             this.AddCityAddingTile();
+        }
+
+        /// <summary>
+        /// Adds a new city tile to the ui
+        /// </summary>
+        /// <param name="city"></param>
+        private void AddCityTile(City city)
+        {
+            //Create new panel
+            RelativePanel panel = new RelativePanel();
+            panel.Height = 200;
+            panel.Width = 200;
+            panel.Margin = new Thickness(5);
+            panel.BorderThickness = new Thickness(2);
+            panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
+            panel.Name = city.Key + "";
+            //Create tile content
+            //Add name
+            //Add temperature
+            TextBlock tbn = new TextBlock();
+            tbn.Text = city.LocalizedName;
+            tbn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
+            tbn.SetValue(RelativePanel.AlignTopWithPanelProperty, true);
+            tbn.FontSize = 22;
+            tbn.Foreground = new SolidColorBrush(Colors.White);
+            tbn.FontWeight = FontWeights.Bold;
+            panel.Children.Add(tbn);
+
+
+            //Add weather picture
+            Image img = new Image();
+            img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + city.Weather.WeatherIcon + ".png"));
+            img.Margin = new Thickness(30, 65, 0, 0);
+            img.Width = 60;
+            img.Height = 60;
+            panel.Children.Add(img);
+            //Add temperature
+            TextBlock tb = new TextBlock();
+            tb.Text = Math.Round(city.Weather.Temperature.Metric.Value) + "°C";
+            tb.Margin = new Thickness(90, 60, 10, 60);
+            tb.FontSize = 40;
+            tb.Foreground = new SolidColorBrush(Colors.White);
+            tb.FontWeight = FontWeights.Bold;
+            panel.Children.Add(tb);
+            //Add temperature max min
+            TextBlock tbmn = new TextBlock();
+            tbmn.Text = city.Weather.WeatherText;
+            tbmn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
+            tbmn.SetValue(RelativePanel.AlignBottomWithPanelProperty, true);
+            tbmn.Margin = new Thickness(7, -50, 7, 0);
+            tbmn.FontSize = 19;
+            tbmn.Foreground = new SolidColorBrush(Colors.White);
+            tbmn.FontWeight = FontWeights.Bold;
+            panel.Children.Add(tbmn);
+
+            //Add mouse hover effect
+            panel.PointerEntered += City_Tile_Panel_PointerEntered;
+            panel.PointerExited += City_Tile_Panel_PointerExited;
+            //Add tap event to the panel
+            panel.Tapped += City_Tile_Panel_Tapped;
+            //Add to the parent stack panel
+            spCities.Children.Add(panel);
         }
 
         /// <summary>
@@ -191,25 +204,31 @@ namespace WeatherApp
                 (forecast) => {
                     //Clear the storage grid
                     spForecastDays.Children.Clear();
-                    //Day counter
-                    int column = 0;
-                    //Loop the days
-                    foreach (DailyForecast day in forecast.DailyForecasts)
-                    {
-                        this.AddDayPanel(day, column);
-                        column++;
-                    }
                     //Add the forecast to the city
                     city.Forecast5Day = forecast;
-
                     //Add timestamp to the city
                     city.LastUpdated = DateTime.Now;
+                    //Loop the days
+                    for (int i=0; i<city.Forecast5Day.DailyForecasts.Count; i++)
+                    {
+                        this.AddDayPanel(city.Forecast5Day.DailyForecasts[i], i);
+                    }
+                    //Update the ui with the last updated time
+                    tblForecastLastUpdated.Text = city.LastUpdated.ToString();
                     //Save the city to the storage
                     this.userDataStorage.SaveCity(city);
                     return true;
                 },
                 (error) =>
                 {
+
+                    //Loop the days and update with the old data
+                    for (int i = 0; i < city.Forecast5Day.DailyForecasts.Count; i++)
+                    {
+                        this.AddDayPanel(city.Forecast5Day.DailyForecasts[i], i);
+                    }
+                    //Update the ui with the last updated time
+                    tblForecastLastUpdated.Text = city.LastUpdated.ToString();
 
                     //Clear the storage grid
                     spForecastDays.Children.Clear();
@@ -335,7 +354,7 @@ namespace WeatherApp
         private void City_Tile_Panel_PointerExited(object sender, PointerRoutedEventArgs e)
         {
             RelativePanel p = (RelativePanel)sender;
-            p.Background= new SolidColorBrush(Colors.White);
+            p.Background= new SolidColorBrush(Colors.Transparent);
             Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Arrow, 0);
         }
         /// <summary>
