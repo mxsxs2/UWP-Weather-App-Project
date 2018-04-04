@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WeatherApp.DataModel.Forecast5Day
 {
-    class Forecast5Day
+    public class Forecast5Day
     {
 
         public Headline Headline { get; set; }

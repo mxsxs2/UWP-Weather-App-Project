@@ -15,7 +15,9 @@ namespace WeatherApp.DataModel
         public string LocalizedName { get; set; }
         public Country Country { get; set; }
         public AdministrativeArea AdministrativeArea { get; set; }
-        public CityWeather weather { get; set; }
+        public CityWeather Weather { get; set; }
+        public Forecast5Day.Forecast5Day Forecast5Day { get; set; }
+        public DateTime LastUpdated { get; set; }
     }
 
 

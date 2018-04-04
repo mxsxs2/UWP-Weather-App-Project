@@ -58,7 +58,7 @@ namespace WeatherApp
                 //Load the city tiles from the user data
                 this.AddLocationTiles(this.userCities);
                 //Load forecast for the default city
-                this.LoadForecastForCity(this.userCities[0].Key);
+                this.LoadForecastForCity(this.userCities[0]);
                 return true;
             });
             
@@ -108,7 +108,7 @@ namespace WeatherApp
                     (weather) =>
                     {
                         //Set the weather for the city
-                        city.weather = weather;
+                        city.Weather = weather;
                         //Create new panel
                         RelativePanel panel = new RelativePanel();
                         panel.Height = 200;
@@ -132,14 +132,14 @@ namespace WeatherApp
 
                         //Add weather picture
                         Image img = new Image();
-                        img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + city.weather.WeatherIcon + ".png"));
+                        img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + city.Weather.WeatherIcon + ".png"));
                         img.Margin = new Thickness(30, 65, 0, 0);
                         img.Width = 60;
                         img.Height = 60;
                         panel.Children.Add(img);
                         //Add temperature
                         TextBlock tb = new TextBlock();
-                        tb.Text = Math.Round(city.weather.Temperature.Metric.Value) + "°C";
+                        tb.Text = Math.Round(city.Weather.Temperature.Metric.Value) + "°C";
                         tb.Margin = new Thickness(90, 60, 10, 60);
                         tb.FontSize = 40;
                         tb.Foreground = new SolidColorBrush(Colors.White);
@@ -147,7 +147,7 @@ namespace WeatherApp
                         panel.Children.Add(tb);
                         //Add temperature max min
                         TextBlock tbmn = new TextBlock();
-                        tbmn.Text = city.weather.WeatherText;
+                        tbmn.Text = city.Weather.WeatherText;
                         tbmn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
                         tbmn.SetValue(RelativePanel.AlignBottomWithPanelProperty, true);
                         tbmn.Margin = new Thickness(7, -50, 7, 0);
@@ -163,6 +163,10 @@ namespace WeatherApp
                         panel.Tapped += City_Tile_Panel_Tapped;
                         //Add to the parent stack panel
                         spCities.Children.Add(panel);
+                        //Add timestamp to the city
+                        city.LastUpdated = DateTime.Now;
+                        //Save the city to the storage
+                        this.userDataStorage.SaveCity(city);
                         return true;
                     },
                     (error) =>
@@ -180,10 +184,10 @@ namespace WeatherApp
         /// Loads the forecast for a specific city
         /// </summary>
         /// <param name="cityKey"></param>
-        private void LoadForecastForCity(string cityKey)
+        private void LoadForecastForCity(City city)
         {
             //Load the city data
-            this.WAC.Get5DayForecastForCityAsync(cityKey,
+            this.WAC.Get5DayForecastForCityAsync(city.Key,
                 (forecast) => {
                     //Clear the storage grid
                     spForecastDays.Children.Clear();
@@ -195,6 +199,13 @@ namespace WeatherApp
                         this.AddDayPanel(day, column);
                         column++;
                     }
+                    //Add the forecast to the city
+                    city.Forecast5Day = forecast;
+
+                    //Add timestamp to the city
+                    city.LastUpdated = DateTime.Now;
+                    //Save the city to the storage
+                    this.userDataStorage.SaveCity(city);
                     return true;
                 },
                 (error) =>
@@ -222,7 +233,18 @@ namespace WeatherApp
         /// <param name="e"></param>
         private void City_Tile_Panel_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            this.LoadForecastForCity(((RelativePanel)sender).Name);
+            //Find City
+            for (int i = 0; i < this.userCities.Count; i++)
+            {
+                //If the city was found
+                if (this.userCities[i].Key == ((RelativePanel)sender).Name)
+                {
+                    this.LoadForecastForCity(this.userCities[i]);
+                    break;
+                }
+            }
+
+                    
         }
 
         /// <summary>
@@ -235,7 +257,6 @@ namespace WeatherApp
             //Get day name from epoch time
             System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
             dtDateTime = dtDateTime.AddSeconds(day.EpochDate).ToLocalTime();
-            System.Diagnostics.Debug.WriteLine(dtDateTime.DayOfWeek);
             //Create day name
             TextBlock tbn = new TextBlock();
             tbn.Text = dtDateTime.DayOfWeek.ToString();
