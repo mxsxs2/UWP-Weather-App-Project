@@ -111,6 +111,7 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <Content Include="Assets\add.png" />
     <Content Include="Assets\icons\1.png" />
     <Content Include="Assets\icons\11.png" />
     <Content Include="Assets\icons\12.png" />

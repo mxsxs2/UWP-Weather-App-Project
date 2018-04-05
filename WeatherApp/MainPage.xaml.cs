@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using WeatherApp.DataModel;
 using WeatherApp.DataModel.Forecast5Day;
@@ -23,11 +24,14 @@ using Windows.UI.Xaml.Navigation;
 
 namespace WeatherApp
 {
+
+
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page
     {
+
         //List of all cities
         private List<City> cities = new List<City>();
         //List of the cities which the user wants
@@ -70,20 +74,24 @@ namespace WeatherApp
         /// </summary>
         private void AddCityAddingTile()
         {
-            //Create tile content
-            TextBlock tb = new TextBlock();
-            tb.Text = "Add";
-            tb.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
-            tb.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
-
+            //Add city adding icon
+            Image img = new Image();
+            img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/add.png"));
+            img.Width = 100;
+            img.Height = 100;
+            img.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
+            img.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
             //Create new panel
             RelativePanel panel = new RelativePanel();
             panel.Height = 200;
             panel.Width = 200;
             panel.Margin = new Thickness(5);
-            panel.BorderThickness = new Thickness(2);
+            panel.BorderThickness = new Thickness(1);
             panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
-            panel.Children.Add(tb);
+            panel.Children.Add(img);
+            //Add mouse hover effect
+            panel.PointerEntered += City_Tile_Panel_PointerEntered;
+            panel.PointerExited += City_Tile_Panel_PointerExited;
             panel.Tapped += this.rlpAddLocation_Tapped;
             spCities.Children.Add(panel);
         }
@@ -125,7 +133,6 @@ namespace WeatherApp
                         System.Diagnostics.Debug.WriteLine(error);
                         return true;
                     });
-                break;
             }
             //Add the city adding tile
             this.AddCityAddingTile();
@@ -142,7 +149,7 @@ namespace WeatherApp
             panel.Height = 200;
             panel.Width = 200;
             panel.Margin = new Thickness(5);
-            panel.BorderThickness = new Thickness(2);
+            panel.BorderThickness = new Thickness(1);
             panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
             panel.Name = city.Key + "";
             //Create tile content
@@ -221,7 +228,8 @@ namespace WeatherApp
                 },
                 (error) =>
                 {
-
+                    //Clear the storage grid
+                    spForecastDays.Children.Clear();
                     //Loop the days and update with the old data
                     for (int i = 0; i < city.Forecast5Day.DailyForecasts.Count; i++)
                     {
@@ -229,18 +237,6 @@ namespace WeatherApp
                     }
                     //Update the ui with the last updated time
                     tblForecastLastUpdated.Text = city.LastUpdated.ToString();
-
-                    //Clear the storage grid
-                    spForecastDays.Children.Clear();
-                    //Create tile content
-                    TextBlock tb = new TextBlock();
-                    tb.Text = "Could not load weather data";
-                    tb.HorizontalAlignment = HorizontalAlignment.Center;
-                    tb.VerticalAlignment = VerticalAlignment.Center;
-                    Grid.SetColumnSpan(tb, 5);
-                    Grid.SetRowSpan(tb, 3);
-                    //Add to the parent grid
-                    spForecastDays.Children.Add(tb);
                     return true;
                 });
         }
@@ -273,6 +269,7 @@ namespace WeatherApp
         /// <param name="col"></param>
         private void AddDayPanel(DailyForecast day, int col)
         {
+            
             //Get day name from epoch time
             System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
             dtDateTime = dtDateTime.AddSeconds(day.EpochDate).ToLocalTime();
@@ -380,6 +377,8 @@ namespace WeatherApp
             //Load the cities into the list
             lvCities.ItemsSource = this.cities;
             fpFlyoutDetails.Visibility = Visibility.Visible;
+            //Set the focus to the serach box
+            tbxCitySearch.Focus(FocusState.Pointer);
         }
 
         /// <summary>
@@ -432,6 +431,26 @@ namespace WeatherApp
                         return true;
                     });
             }
+        }
+        /// <summary>
+        /// Removes placeholder from the city search box 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void tbxCitySearch_GotFocus(object sender, RoutedEventArgs args)
+        {
+            if(tbxCitySearch.Text.Trim()== "Search City...")
+                tbxCitySearch.Text = "";
+        }
+        /// <summary>
+        /// Adds place holder to the city search box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void tbxCitySearch_LostFocus(object sender, RoutedEventArgs args)
+        {
+            if (String.IsNullOrWhiteSpace(tbxCitySearch.Text))
+                tbxCitySearch.Text = "Search City...";
         }
     }
 }
