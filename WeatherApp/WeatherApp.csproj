@@ -112,6 +112,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <Content Include="Assets\add.png" />
+    <Content Include="Assets\change.png" />
     <Content Include="Assets\icons\1.png" />
     <Content Include="Assets\icons\11.png" />
     <Content Include="Assets\icons\12.png" />
@@ -152,9 +153,6 @@
     <Content Include="Assets\icons\6.png" />
     <Content Include="Assets\icons\7.png" />
     <Content Include="Assets\icons\8.png" />
-    <Content Include="Data\city_list.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="WeatherApp_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

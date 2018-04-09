@@ -60,6 +60,59 @@ namespace WeatherApp
         }
 
         /// <summary>
+        /// Removes a city from the storage
+        /// </summary>
+        /// <param name="city"></param>
+        public async void RemoveCity(City city)
+        {
+            //Load the file
+            StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
+            //Read the contents of the file
+            string fileContent = await Windows.Storage.FileIO.ReadTextAsync(file);
+            //Deserialize json 
+            UserData ud = JsonConvert.DeserializeObject<UserData>(fileContent);
+            //Find the city
+            for (int i = 0; i < ud.cities.Count; i++)
+            {
+                //If the two keys match then the city was found
+                if (ud.cities[i].Key == city.Key)
+                {
+                    //Remove the city
+                    ud.cities.RemoveAt(i);
+                    break;
+                }
+            }
+
+            this.SaveUserData(ud);
+        }
+
+
+        public async void SetCityAsDefault(City city)
+        {
+            //Load the file
+            StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
+            //Read the contents of the file
+            string fileContent = await Windows.Storage.FileIO.ReadTextAsync(file);
+            //Deserialize json 
+            UserData ud = JsonConvert.DeserializeObject<UserData>(fileContent);
+            //Find the city
+            for (int i = 0; i < ud.cities.Count; i++)
+            {
+                //If the two keys match then the city was found
+                if (ud.cities[i].Key == city.Key)
+                {
+                    //Remove the city
+                    ud.cities.RemoveAt(i);
+                    //Add the city as first item
+                    ud.cities.Insert(0, city);
+                    break;
+                }
+            }
+
+            this.SaveUserData(ud);
+        }
+
+        /// <summary>
         /// Loads the user data json file from the application storage
         /// </summary>
         /// <param name="callBack"></param>

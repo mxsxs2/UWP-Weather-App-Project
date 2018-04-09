@@ -10,6 +10,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Popups;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -40,6 +41,8 @@ namespace WeatherApp
         private UserDataStorage userDataStorage = new UserDataStorage();
         //Weather api conncetor
         private WeatherAPIConnector WAC = new WeatherAPIConnector();
+        //City For settings
+        private int cityIndexForSettings=-1;
         public MainPage()
         {
             this.InitializeComponent();
@@ -103,8 +106,8 @@ namespace WeatherApp
             //Clear the tile holder
             spCities.Children.Clear();
 
-            //Flag if the city is the first
-            bool firstCity = true;
+            //Counter for the number of cities
+            int index = 0;
             //Loop al the cities in the list
             foreach(City city in cities)
             {
@@ -118,9 +121,9 @@ namespace WeatherApp
                         //Add timestamp to the city
                         city.LastUpdated = DateTime.Now;
                         //Add the tile
-                        this.AddCityTile(city);
+                        this.AddCityTile(city,index);
                         //If it is the first city then we need the forecast as well
-                        if (firstCity)
+                        if (index==0)
                         {
                             //Load forecast for the default city. This will save to the storage as well
                             this.LoadForecastForCity(city);
@@ -136,13 +139,18 @@ namespace WeatherApp
                     (error) =>
                     {
                         //Add the tile with the old data
-                        this.AddCityTile(city);
+                        this.AddCityTile(city,index);
+                        //If it is the first city then we need the forecast as well
+                        if (index == 0)
+                        {
+                            //Load forecast for the default city. This will save to the storage as well
+                            this.LoadForecastForCity(city);
 
-                        System.Diagnostics.Debug.WriteLine(error);
+                        }
                         return true;
                     });
-                //Set the first city flag
-                firstCity = false;
+                //Increase the counter
+                index++;
             }
             //Add the city adding tile
             this.AddCityAddingTile();
@@ -152,7 +160,8 @@ namespace WeatherApp
         /// Adds a new city tile to the ui
         /// </summary>
         /// <param name="city"></param>
-        private void AddCityTile(City city)
+        /// <param name="index"></param>
+        private void AddCityTile(City city,int index)
         {
             //Create new panel
             RelativePanel panel = new RelativePanel();
@@ -162,6 +171,7 @@ namespace WeatherApp
             panel.BorderThickness = new Thickness(1);
             panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
             panel.Name = city.Key + "";
+
             //Create tile content
             //Add name
             //Add temperature
@@ -201,6 +211,19 @@ namespace WeatherApp
             tbmn.FontWeight = FontWeights.Bold;
             panel.Children.Add(tbmn);
 
+
+            //Add settings picture
+            Image imgCh = new Image();
+            imgCh.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/change.png"));
+            imgCh.SetValue(RelativePanel.AlignRightWithPanelProperty, true);
+            imgCh.SetValue(RelativePanel.AlignTopWithPanelProperty, true);
+            imgCh.Width = 20;
+            imgCh.Height = 20;
+            imgCh.Name = index+"";
+            imgCh.Tapped += ImgCh_Tapped;
+            panel.Children.Add(imgCh);
+
+
             //Add mouse hover effect
             panel.PointerEntered += City_Tile_Panel_PointerEntered;
             panel.PointerExited += City_Tile_Panel_PointerExited;
@@ -209,6 +232,7 @@ namespace WeatherApp
             //Add to the parent stack panel
             spCities.Children.Add(panel);
         }
+        
 
         /// <summary>
         /// Loads the forecast for a specific city
@@ -354,30 +378,6 @@ namespace WeatherApp
             Grid.SetColumn(tbt, col);
             Grid.SetRow(tbt, 2);
         }
-
-
-        /// <summary>
-        /// Sets the background of the city tile to white and the cursor to the original arrow
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void City_Tile_Panel_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RelativePanel p = (RelativePanel)sender;
-            p.Background= new SolidColorBrush(Colors.Transparent);
-            Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Arrow, 0);
-        }
-        /// <summary>
-        /// Sets the background of the city tile to aqua and the cursor to the hand
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void City_Tile_Panel_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            RelativePanel p = (RelativePanel)sender;
-            p.Background = new SolidColorBrush(Colors.Aqua);
-            Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Hand, 0);
-        }
        
 
         /// <summary>
@@ -389,7 +389,7 @@ namespace WeatherApp
         {
             //Load the cities into the list
             lvCities.ItemsSource = this.cities;
-            fpFlyoutDetails.Visibility = Visibility.Visible;
+            fpCitySearch.Visibility = Visibility.Visible;
             //Set the focus to the serach box
             tbxCitySearch.Focus(FocusState.Pointer);
         }
@@ -408,7 +408,7 @@ namespace WeatherApp
             //Rerender the user city tiles
             this.AddLocationTiles(this.userCities);
             //Close the fylout
-            this.btnFlyoutClose_Tapped(fpFlyoutDetails, e);
+            this.btnFlyoutClose_Tapped(fpCitySearch, e);
         }
 
         /// <summary>
@@ -419,7 +419,7 @@ namespace WeatherApp
         private void btnFlyoutClose_Tapped(object sender, TappedRoutedEventArgs e)
         {
             //Hide the fly out
-            fpFlyoutDetails.Visibility = Visibility.Collapsed;
+            fpCitySearch.Visibility = Visibility.Collapsed;
         }
 
         private void tbxCitySearch_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -464,6 +464,153 @@ namespace WeatherApp
         {
             if (String.IsNullOrWhiteSpace(tbxCitySearch.Text))
                 tbxCitySearch.Text = "Search City...";
+        }
+
+        /// <summary>
+        /// Toggles the tile setting flyout
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ImgCh_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            //If the flyout is not visible yet
+            if (fpTileSettings.Visibility != Visibility.Visible)
+            {
+                //Get the absolute position of the clicked cog
+                var ttv = ((Image)sender).TransformToVisual(Window.Current.Content);
+                Point screenCoords = ttv.TransformPoint(new Point(0, 0));
+                //Set the position of the flyout
+                fpTileSettings.Margin = new Thickness(screenCoords.X, screenCoords.Y + 20, 10, 10);
+                fpTileSettings.Visibility = Visibility.Visible;
+                //Set the city for settings
+                this.cityIndexForSettings = Convert.ToInt32(((Image)sender).Name);
+            }
+            else
+            {
+                //Close the flyout
+                this.tblClose_Tapped(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Hides the settings flyout presenter
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tblClose_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            fpTileSettings.Visibility = Visibility.Collapsed;
+            //Remove the city for settings
+            this.cityIndexForSettings = -1;
+        }
+
+        /// <summary>
+        /// Sets the current sity as default
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tblSetDeafult_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+           
+            //Set the city as default
+            this.userDataStorage.SetCityAsDefault(this.userCities[this.cityIndexForSettings]);
+            //Get a backup of the city
+            City tmp = this.userCities[this.cityIndexForSettings];
+            //Remove from the current position
+            this.userCities.RemoveAt(this.cityIndexForSettings);
+            //Add to the front
+            this.userCities.Insert(0, tmp);
+            //Re do the tiles
+            this.AddLocationTiles(this.userCities);
+            //Close the fylout
+            this.tblClose_Tapped(sender, e);
+        }
+
+        /// <summary>
+        /// Ask for confirmation of city removal from the user's preferred list
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void tblRemove_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            // Create the message dialog and set its content
+            var messageDialog = new MessageDialog("Would you like to remove "+this.userCities[this.cityIndexForSettings].LocalizedName+"?");
+            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
+            messageDialog.Commands.Add(new UICommand("Yes",new UICommandInvokedHandler(this.RemoveConfirmation_Tapped)));
+            messageDialog.Commands.Add(new UICommand("Close",new UICommandInvokedHandler(this.RemoveConfirmation_Tapped)));
+            // Set the command that will be invoked by default
+            messageDialog.DefaultCommandIndex = 1;
+            // Set the command to be invoked when escape is pressed
+            messageDialog.CancelCommandIndex = 1;
+            // Show the message dialog
+            await messageDialog.ShowAsync();
+        }
+
+        /// <summary>
+        /// If the yes was tapped in the confirmation block it removes the city
+        /// </summary>
+        /// <param name="command"></param>
+        private void RemoveConfirmation_Tapped(IUICommand command)
+        {
+            //If yes was selected
+            if (command.Label == "Yes")
+            {
+                //Remove the city
+                this.userDataStorage.RemoveCity(this.userCities[this.cityIndexForSettings]);
+                //Remove from the list
+                this.userCities.RemoveAt(this.cityIndexForSettings);
+                //Re do the tiles
+                this.AddLocationTiles(this.userCities);
+            }
+
+            //Close the flyout
+            fpTileSettings.Visibility = Visibility.Collapsed;
+            //Remove the city for settings
+            this.cityIndexForSettings = -1;
+        }
+
+        /// <summary>
+        /// Sets the cursor to the hand when the pointer enters the text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SettingsText_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Hand, 0);
+        }
+
+        /// <summary>
+        /// Sets the cursor to the original arrow when the pointer leves the text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SettingsText_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+
+            Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Arrow, 0);
+        }
+
+        /// <summary>
+        /// Sets the background of the city tile to white and the cursor to the original arrow
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void City_Tile_Panel_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            RelativePanel p = (RelativePanel)sender;
+            p.Background = new SolidColorBrush(Colors.Transparent);
+            Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Arrow, 0);
+        }
+        /// <summary>
+        /// Sets the background of the city tile to aqua and the cursor to the hand
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void City_Tile_Panel_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            RelativePanel p = (RelativePanel)sender;
+            p.Background = new SolidColorBrush(Colors.Aqua);
+            Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Hand, 0);
         }
     }
 }

@@ -60,9 +60,9 @@
             <TextBlock TextWrapping="NoWrap" Text="Last updated at: " Foreground="White" FontWeight="Bold" FontSize="10"/>
             <TextBlock x:Name="tblForecastLastUpdated" TextWrapping="NoWrap" Text="" Foreground="White" FontWeight="Bold" FontSize="10"/>
         </StackPanel>
-        <Rectangle Opacity="0.7" Fill="Black" Visibility="{Binding Visibility,ElementName=fpFlyoutDetails}" Grid.RowSpan="4"/>
+        <Rectangle Opacity="0.7" Fill="Black" Visibility="{Binding Visibility,ElementName=fpCitySearch}" Grid.RowSpan="4"/>
         <FlyoutPresenter  Width="330"
-                         Height="500" x:Name="fpFlyoutDetails"
+                         Height="500" x:Name="fpCitySearch"
                          Visibility="Collapsed" Margin="10"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"
@@ -78,6 +78,30 @@
                       ItemTemplate="{StaticResource cityTemplate}">
                 </ListView>
                 <Button x:Name="btnFlyoutClose" Content="Close" Tapped="btnFlyoutClose_Tapped" HorizontalAlignment="Stretch" Margin="0,5"/>
+            </StackPanel>
+
+        </FlyoutPresenter>
+
+
+        <FlyoutPresenter  Width="130"
+                          Height="75"
+                          x:Name="fpTileSettings"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Top"
+                          Padding="5"
+                          Visibility="Collapsed"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          >
+            <FlyoutPresenter.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF063268"/>
+                    <GradientStop Color="#FF0866DA" Offset="1"/>
+                </LinearGradientBrush>
+            </FlyoutPresenter.Background>
+            <StackPanel HorizontalAlignment="Left" Width="300">
+                <TextBlock Text="Remove" HorizontalAlignment="Left" x:Name="tblRemove" Foreground="White" FontWeight="Bold" FontSize="15" Tapped="tblRemove_Tapped" PointerEntered="SettingsText_PointerEntered" PointerExited="SettingsText_PointerExited"/>
+                <TextBlock Text="Set as default" HorizontalAlignment="Left" x:Name="tblSetDeafult" Foreground="White" FontWeight="Bold" FontSize="15" Tapped="tblSetDeafult_Tapped" PointerEntered="SettingsText_PointerEntered" PointerExited="SettingsText_PointerExited"/>
+                <TextBlock Text="Close" HorizontalAlignment="Left" x:Name="tblClose" Foreground="White" FontWeight="Bold" FontSize="15" Tapped="tblClose_Tapped" PointerEntered="SettingsText_PointerEntered" PointerExited="SettingsText_PointerExited"/>
             </StackPanel>
 
         </FlyoutPresenter>
