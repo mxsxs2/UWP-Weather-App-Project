@@ -48,7 +48,7 @@ namespace WeatherApp
             new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Do the http response call with the query string and api key
-            HttpResponseMessage response = client.GetAsync("?"+queries+ "&apikey=" + apiKey).Result;
+            HttpResponseMessage response = client.GetAsync("?"+queries+ "&metric=true&apikey=" + apiKey).Result;
             //If the response code is 200
             if (response.IsSuccessStatusCode)
             {

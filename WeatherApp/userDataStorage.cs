@@ -11,6 +11,7 @@ namespace WeatherApp
 {
     public class UserDataStorage
     {
+        //The name of the data file 
         private string userDataFileName = "userDataFile.json";
 
 
@@ -41,7 +42,7 @@ namespace WeatherApp
             else
             {
                 //Load the file
-                file = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
+                StorageFile file2 = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
                 //Read the contents of the file
                 string fileContent=await Windows.Storage.FileIO.ReadTextAsync(file);
                 //Deserialize json 
@@ -104,6 +105,8 @@ namespace WeatherApp
             string fileContent = await Windows.Storage.FileIO.ReadTextAsync(file);
             //Deserialize json 
             UserData ud = JsonConvert.DeserializeObject<UserData>(fileContent);
+            //Check if the city exists
+            bool foundCity = false;
             //Find the city
             for (int i = 0; i<ud.cities.Count; i++)
             {
@@ -112,8 +115,16 @@ namespace WeatherApp
                 {
                     //Override the city data
                     ud.cities[i] = city;
+                    //Set the flag
+                    foundCity = true;
                     break;
                 }
+            }
+            //If the city was not found
+            if (!foundCity)
+            {
+                //Add the city to the list
+                ud.cities.Add(city);
             }
 
             this.SaveUserData(ud);
@@ -143,8 +154,21 @@ namespace WeatherApp
             //If file and user data was created
             if (ud != null && file != null)
             {
-                //Write the user data to the file
-                await Windows.Storage.FileIO.WriteTextAsync(file, JsonConvert.SerializeObject(ud));
+                try
+                {
+                    //Write the user data to the file
+                    await Windows.Storage.FileIO.WriteTextAsync(file, JsonConvert.SerializeObject(ud));
+                }
+                catch(Exception e)
+                {
+                    //Check if it is used by another process
+                    if("System.IO.FileLoadException"== e.GetType().ToString())
+                    {
+                        //Try to save again
+                        this.SaveUserData(ud);
+                    }
+                    System.Diagnostics.Debug.WriteLine(e.Message+" "+e.GetType() );
+                }
             }
         }
     }

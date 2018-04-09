@@ -40,7 +40,6 @@ namespace WeatherApp
         private UserDataStorage userDataStorage = new UserDataStorage();
         //Weather api conncetor
         private WeatherAPIConnector WAC = new WeatherAPIConnector();
-
         public MainPage()
         {
             this.InitializeComponent();
@@ -61,8 +60,6 @@ namespace WeatherApp
                 this.userCities = data.cities;
                 //Load the city tiles from the user data
                 this.AddLocationTiles(this.userCities);
-                //Load forecast for the default city
-                this.LoadForecastForCity(this.userCities[0]);
                 return true;
             });
             
@@ -106,7 +103,8 @@ namespace WeatherApp
             //Clear the tile holder
             spCities.Children.Clear();
 
-
+            //Flag if the city is the first
+            bool firstCity = true;
             //Loop al the cities in the list
             foreach(City city in cities)
             {
@@ -121,8 +119,18 @@ namespace WeatherApp
                         city.LastUpdated = DateTime.Now;
                         //Add the tile
                         this.AddCityTile(city);
-                        //Save the city to the storage
-                        this.userDataStorage.SaveCity(city);
+                        //If it is the first city then we need the forecast as well
+                        if (firstCity)
+                        {
+                            //Load forecast for the default city. This will save to the storage as well
+                            this.LoadForecastForCity(city);
+
+                        }
+                        else
+                        {
+                            //Save the city to the storage
+                            this.userDataStorage.SaveCity(city);
+                        }
                         return true;
                     },
                     (error) =>
@@ -133,6 +141,8 @@ namespace WeatherApp
                         System.Diagnostics.Debug.WriteLine(error);
                         return true;
                     });
+                //Set the first city flag
+                firstCity = false;
             }
             //Add the city adding tile
             this.AddCityAddingTile();
@@ -206,6 +216,9 @@ namespace WeatherApp
         /// <param name="cityKey"></param>
         private void LoadForecastForCity(City city)
         {
+            //Set the forecast city name
+            tblForecastCityName.Text = city.LocalizedName;
+
             //Load the city data
             this.WAC.Get5DayForecastForCityAsync(city.Key,
                 (forecast) => {
@@ -389,7 +402,7 @@ namespace WeatherApp
         private void StackPanel_Tapped(object sender, TappedRoutedEventArgs e)
         {
             //Add the city to the user data storage
-            this.userDataStorage.AddCity(this.cities[lvCities.SelectedIndex]);
+            //this.userDataStorage.AddCity(this.cities[lvCities.SelectedIndex]);
             //Add city to the memory storage
             this.userCities.Add(this.cities[lvCities.SelectedIndex]);
             //Rerender the user city tiles
