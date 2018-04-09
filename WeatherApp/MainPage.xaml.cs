@@ -112,6 +112,10 @@ namespace WeatherApp
             foreach(City city in cities)
             {
 
+                //Show the loading image
+                imgLoading.Visibility = Visibility.Visible;
+                //Hide connection error image
+                imgConnectionError.Visibility = Visibility.Collapsed;
                 //Load the weather data for the city
                 this.WAC.GetWetaherForCityAsync(city.Key,
                     (weather) =>
@@ -134,6 +138,9 @@ namespace WeatherApp
                             //Save the city to the storage
                             this.userDataStorage.SaveCity(city);
                         }
+
+                        //Hide the loading image
+                        imgLoading.Visibility = Visibility.Collapsed;
                         return true;
                     },
                     (error) =>
@@ -147,6 +154,11 @@ namespace WeatherApp
                             this.LoadForecastForCity(city);
 
                         }
+                        //Show connection error image
+                        imgConnectionError.Visibility = Visibility.Visible;
+
+                        //Hide the loading image
+                        imgLoading.Visibility = Visibility.Collapsed;
                         return true;
                     });
                 //Increase the counter
@@ -240,9 +252,12 @@ namespace WeatherApp
         /// <param name="cityKey"></param>
         private void LoadForecastForCity(City city)
         {
+            //Set the loading image to visible
+            imgLoading.Visibility = Visibility.Visible;
             //Set the forecast city name
             tblForecastCityName.Text = city.LocalizedName;
-
+            //Hide connection error image
+            imgConnectionError.Visibility = Visibility.Collapsed;
             //Load the city data
             this.WAC.Get5DayForecastForCityAsync(city.Key,
                 (forecast) => {
@@ -261,6 +276,8 @@ namespace WeatherApp
                     tblForecastLastUpdated.Text = city.LastUpdated.ToString();
                     //Save the city to the storage
                     this.userDataStorage.SaveCity(city);
+                    //Hide the loading image
+                    imgLoading.Visibility = Visibility.Collapsed;
                     return true;
                 },
                 (error) =>
@@ -274,6 +291,10 @@ namespace WeatherApp
                     }
                     //Update the ui with the last updated time
                     tblForecastLastUpdated.Text = city.LastUpdated.ToString();
+                    //Show connection error image
+                    imgConnectionError.Visibility = Visibility.Visible;
+                    //Hide the loading image
+                    imgLoading.Visibility = Visibility.Collapsed;
                     return true;
                 });
         }

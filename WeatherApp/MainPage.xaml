@@ -32,7 +32,7 @@
             <RowDefinition Height="215"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="14"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <Border BorderBrush="#FF09C4D6" BorderThickness="0 0 0 1">
             <StackPanel  Width="2000" x:Name="spCities" Grid.Column="0" Grid.Row="0" Orientation="Horizontal" Height="215" VerticalAlignment="Top"/>
@@ -56,10 +56,13 @@
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
         </Grid>
-        <StackPanel  Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center" Orientation="Horizontal">
+        <StackPanel  Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center" Orientation="Horizontal" Margin="3">
             <TextBlock TextWrapping="NoWrap" Text="Last updated at: " Foreground="White" FontWeight="Bold" FontSize="10"/>
             <TextBlock x:Name="tblForecastLastUpdated" TextWrapping="NoWrap" Text="" Foreground="White" FontWeight="Bold" FontSize="10"/>
         </StackPanel>
+
+        <Image x:Name="imgConnectionError" Visibility="Collapsed" HorizontalAlignment="Right"  Height="20" VerticalAlignment="Top" Width="20" Grid.Column="0" Grid.Row="3" Source="/Assets/noconnection.png"/>
+        <Image x:Name="imgLoading" Visibility="Collapsed" HorizontalAlignment="Right"  Height="20" VerticalAlignment="Top" Width="20" Grid.Column="0" Grid.Row="3" Source="/Assets/loading.gif"/>
         <Rectangle Opacity="0.7" Fill="Black" Visibility="{Binding Visibility,ElementName=fpCitySearch}" Grid.RowSpan="4"/>
         <FlyoutPresenter  Width="330"
                          Height="500" x:Name="fpCitySearch"
