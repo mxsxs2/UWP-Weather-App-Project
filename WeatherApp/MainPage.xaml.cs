@@ -33,7 +33,7 @@ namespace WeatherApp
     /// </summary>
     public sealed partial class MainPage : Page
     {
-
+        #region ClassMembers
         //List of all cities
         private List<City> cities = new List<City>();
         //List of the cities which the user wants
@@ -44,6 +44,9 @@ namespace WeatherApp
         private WeatherAPIConnector WAC = new WeatherAPIConnector();
         //City For settings
         private int cityIndexForSettings=-1;
+        #endregion
+
+        #region InitializationAndPointOfEntry
         public MainPage()
         {
             this.InitializeComponent();
@@ -67,26 +70,32 @@ namespace WeatherApp
             
             
         }
+        #endregion
 
+        #region CityTiles
         /// <summary>
         /// Adds the city adding tile to the list of cities
         /// </summary>
         private void AddCityAddingTile()
         {
             //Add city adding icon
-            Image img = new Image();
-            img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/add.png"));
-            img.Width = 100;
-            img.Height = 100;
+            Image img = new Image
+            {
+                Source = new BitmapImage(new System.Uri("ms-appx:///Assets/add.png")),
+                Width = 100,
+                Height = 100
+            };
             img.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
             img.SetValue(RelativePanel.AlignVerticalCenterWithPanelProperty, true);
             //Create new panel
-            RelativePanel panel = new RelativePanel();
-            panel.Height = 200;
-            panel.Width = 200;
-            panel.Margin = new Thickness(5);
-            panel.BorderThickness = new Thickness(1);
-            panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
+            RelativePanel panel = new RelativePanel
+            {
+                Height = 200,
+                Width = 200,
+                Margin = new Thickness(5),
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush(Colors.Aqua)
+            };
             panel.Children.Add(img);
             //Add mouse hover effect
             panel.PointerEntered += City_Tile_Panel_PointerEntered;
@@ -174,62 +183,73 @@ namespace WeatherApp
         private void AddCityTile(City city,int index)
         {
             //Create new panel
-            RelativePanel panel = new RelativePanel();
-            panel.Height = 200;
-            panel.Width = 200;
-            panel.Margin = new Thickness(5);
-            panel.BorderThickness = new Thickness(1);
-            panel.BorderBrush = new SolidColorBrush(Colors.Aqua);
-            panel.Name = city.Key + "";
+            RelativePanel panel = new RelativePanel
+            {
+                Height = 200,
+                Width = 200,
+                Margin = new Thickness(5),
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush(Colors.Aqua),
+                Name = city.Key + ""
+            };
 
             //Create tile content
             //Add name
-            //Add temperature
-            TextBlock tbn = new TextBlock();
-            tbn.Text = city.LocalizedName;
+            TextBlock tbn = new TextBlock
+            {
+                Text = city.LocalizedName,
+                FontSize = 22,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+
+            };
             tbn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
-            tbn.SetValue(RelativePanel.AlignTopWithPanelProperty, true);
-            tbn.FontSize = 22;
-            tbn.Foreground = new SolidColorBrush(Colors.White);
-            tbn.FontWeight = FontWeights.Bold;
             panel.Children.Add(tbn);
 
 
             //Add weather picture
-            Image img = new Image();
-            img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + city.Weather.WeatherIcon + ".png"));
-            img.Margin = new Thickness(30, 65, 0, 0);
-            img.Width = 60;
-            img.Height = 60;
+            Image img = new Image
+            {
+                Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + city.Weather.WeatherIcon + ".png")),
+                Margin = new Thickness(30, 65, 0, 0),
+                Width = 60,
+                Height = 60
+            };
             panel.Children.Add(img);
             //Add temperature
-            TextBlock tb = new TextBlock();
-            tb.Text = Math.Round(city.Weather.Temperature.Metric.Value) + "°C";
-            tb.Margin = new Thickness(90, 60, 10, 60);
-            tb.FontSize = 40;
-            tb.Foreground = new SolidColorBrush(Colors.White);
-            tb.FontWeight = FontWeights.Bold;
+            TextBlock tb = new TextBlock
+            {
+                Text = Math.Round(city.Weather.Temperature.Metric.Value) + "°C",
+                Margin = new Thickness(90, 60, 10, 60),
+                FontSize = 40,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
             panel.Children.Add(tb);
             //Add temperature max min
-            TextBlock tbmn = new TextBlock();
-            tbmn.Text = city.Weather.WeatherText;
+            TextBlock tbmn = new TextBlock
+            {
+                Text = city.Weather.WeatherText,
+                Margin = new Thickness(7, -50, 7, 0),
+                FontSize = 19,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
             tbmn.SetValue(RelativePanel.AlignHorizontalCenterWithPanelProperty, true);
             tbmn.SetValue(RelativePanel.AlignBottomWithPanelProperty, true);
-            tbmn.Margin = new Thickness(7, -50, 7, 0);
-            tbmn.FontSize = 19;
-            tbmn.Foreground = new SolidColorBrush(Colors.White);
-            tbmn.FontWeight = FontWeights.Bold;
             panel.Children.Add(tbmn);
 
 
             //Add settings picture
-            Image imgCh = new Image();
-            imgCh.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/change.png"));
+            Image imgCh = new Image
+            {
+                Source = new BitmapImage(new System.Uri("ms-appx:///Assets/change.png")),
+                Width = 20,
+                Height = 20,
+                Name = index + ""
+            };
             imgCh.SetValue(RelativePanel.AlignRightWithPanelProperty, true);
             imgCh.SetValue(RelativePanel.AlignTopWithPanelProperty, true);
-            imgCh.Width = 20;
-            imgCh.Height = 20;
-            imgCh.Name = index+"";
             imgCh.Tapped += ImgCh_Tapped;
             panel.Children.Add(imgCh);
 
@@ -242,8 +262,9 @@ namespace WeatherApp
             //Add to the parent stack panel
             spCities.Children.Add(panel);
         }
+        #endregion
 
-
+        #region ForecastLoaders
         /// <summary>
         /// Loads 5 days and 12 hours forecast for city
         /// </summary>
@@ -353,7 +374,9 @@ namespace WeatherApp
                     return true;
                 });
         }
+        #endregion
 
+        #region ForecastLayout
         /// <summary>
         /// Adds a day panel into the forecast grid
         /// </summary>
@@ -418,7 +441,102 @@ namespace WeatherApp
             Grid.SetRow(tbt, 3);
         }
 
+        /// <summary>
+        /// Adds a day panel into the forecast grid
+        /// </summary>
+        /// <param name="day"></param>
+        /// <param name="col"></param>
+        private void AddDayPanel(DailyForecast day, int col)
+        {
+            
+            //Get day name from epoch time
+            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dtDateTime = dtDateTime.AddSeconds(day.EpochDate).ToLocalTime();
+            //Create day name
+            TextBlock tbn = new TextBlock
+            {
+                Text = dtDateTime.DayOfWeek.ToString(),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 20,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
+            spForecastDays.Children.Add(tbn);
+            Grid.SetColumn(tbn, col);
+            Grid.SetRow(tbn, 0);
 
+            //Create stackpanels for day/night pictures
+            StackPanel panel = new StackPanel();
+            StackPanel dayPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            StackPanel nightPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            panel.Children.Add(dayPanel);
+            panel.Children.Add(nightPanel);
+            spForecastDays.Children.Add(panel);
+            Grid.SetColumn(panel, col);
+            Grid.SetRow(panel, 1);
+            //Day
+            TextBlock tbd = new TextBlock
+            {
+                Text = "Day  ",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 18,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
+            dayPanel.Children.Add(tbd);
+            //Day Picture
+            Image img = new Image
+            {
+                Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + day.Day.Icon + ".png")),
+                Width = 60,
+                Height = 60
+            };
+            dayPanel.Children.Add(img);
+            //Night
+            TextBlock tbni = new TextBlock
+            {
+                Text = "Night",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 18,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
+            nightPanel.Children.Add(tbni);
+            //DayPicture
+            Image img2 = new Image();
+            img2.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + day.Night.Icon + ".png"));
+            img2.Width = 60;
+            img2.Height = 60;
+            nightPanel.Children.Add(img2);
+
+            //Min/Max temperatures
+            //Add temperature
+            TextBlock tbt = new TextBlock
+            {
+                Text = "Min " + Math.Round(day.Temperature.Minimum.Value) + "°C / Max " + Math.Round(day.Temperature.Maximum.Value) + "°C",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontSize = 15,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
+            spForecastDays.Children.Add(tbt);
+            Grid.SetColumn(tbt, col);
+            Grid.SetRow(tbt, 2);
+        }
+        #endregion
+
+        #region EventHandlers
         /// <summary>
         /// Loads the forecast for the given day when a tile is tapped
         /// </summary>
@@ -437,89 +555,8 @@ namespace WeatherApp
                 }
             }
 
-                    
+
         }
-
-        /// <summary>
-        /// Adds a day panel into the forecast grid
-        /// </summary>
-        /// <param name="day"></param>
-        /// <param name="col"></param>
-        private void AddDayPanel(DailyForecast day, int col)
-        {
-            
-            //Get day name from epoch time
-            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            dtDateTime = dtDateTime.AddSeconds(day.EpochDate).ToLocalTime();
-            //Create day name
-            TextBlock tbn = new TextBlock();
-            tbn.Text = dtDateTime.DayOfWeek.ToString();
-            tbn.HorizontalAlignment = HorizontalAlignment.Center;
-            tbn.VerticalAlignment = VerticalAlignment.Center;
-            tbn.FontSize = 20;
-            tbn.Foreground = new SolidColorBrush(Colors.White);
-            tbn.FontWeight = FontWeights.Bold;
-            spForecastDays.Children.Add(tbn);
-            Grid.SetColumn(tbn, col);
-            Grid.SetRow(tbn, 0);
-
-            //Create stackpanels for day/night pictures
-            StackPanel panel = new StackPanel();
-            StackPanel dayPanel = new StackPanel();
-            dayPanel.Orientation = Orientation.Horizontal;
-            dayPanel.HorizontalAlignment = HorizontalAlignment.Center;
-            StackPanel nightPanel = new StackPanel();
-            nightPanel.Orientation = Orientation.Horizontal;
-            nightPanel.HorizontalAlignment = HorizontalAlignment.Center;
-            panel.Children.Add(dayPanel);
-            panel.Children.Add(nightPanel);
-            spForecastDays.Children.Add(panel);
-            Grid.SetColumn(panel, col);
-            Grid.SetRow(panel, 1);
-            //Day
-            TextBlock tbd = new TextBlock();
-            tbd.Text = "Day  ";
-            tbd.HorizontalAlignment = HorizontalAlignment.Center;
-            tbd.VerticalAlignment = VerticalAlignment.Center;
-            tbd.FontSize = 18;
-            tbd.Foreground = new SolidColorBrush(Colors.White);
-            tbd.FontWeight = FontWeights.Bold;
-            dayPanel.Children.Add(tbd);
-            //Day Picture
-            Image img = new Image();
-            img.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + day.Day.Icon + ".png"));
-            img.Width = 60;
-            img.Height = 60;
-            dayPanel.Children.Add(img);
-            //Night
-            TextBlock tbni = new TextBlock();
-            tbni.Text = "Night";
-            tbni.HorizontalAlignment = HorizontalAlignment.Center;
-            tbni.VerticalAlignment = VerticalAlignment.Center;
-            tbni.FontSize = 18;
-            tbni.Foreground = new SolidColorBrush(Colors.White);
-            tbni.FontWeight = FontWeights.Bold;
-            nightPanel.Children.Add(tbni);
-            //DayPicture
-            Image img2 = new Image();
-            img2.Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + day.Night.Icon + ".png"));
-            img2.Width = 60;
-            img2.Height = 60;
-            nightPanel.Children.Add(img2);
-
-            //Min/Max temperatures
-            //Add temperature
-            TextBlock tbt = new TextBlock();
-            tbt.Text = "Min " + Math.Round(day.Temperature.Minimum.Value) + "°C / Max " + Math.Round(day.Temperature.Maximum.Value) + "°C";
-            tbt.HorizontalAlignment = HorizontalAlignment.Center;
-            tbt.FontSize = 15;
-            tbt.Foreground = new SolidColorBrush(Colors.White);
-            tbt.FontWeight = FontWeights.Bold;
-            spForecastDays.Children.Add(tbt);
-            Grid.SetColumn(tbt, col);
-            Grid.SetRow(tbt, 2);
-        }
-       
 
         /// <summary>
         /// Opens up the city choser fly out when the add button is tapped
@@ -837,5 +874,6 @@ namespace WeatherApp
                 }
             );
         }
+        #endregion
     }
 }
