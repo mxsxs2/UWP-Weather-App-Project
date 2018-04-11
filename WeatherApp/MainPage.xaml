@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
+    
+    <!-- City search list view template start -->
     <Page.Resources>
         <DataTemplate x:Key="cityTemplate">
             <StackPanel Margin="2,4,2,4" Tapped="StackPanel_Tapped">
@@ -17,14 +18,18 @@
             </StackPanel>
         </DataTemplate>
     </Page.Resources>
-
+    <!-- City search list view template end -->
+    
+    
     <Grid>
+        <!-- Main grid background -->
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                 <GradientStop Color="#FF063268"/>
                 <GradientStop Color="#FF0866DA" Offset="1"/>
             </LinearGradientBrush>
         </Grid.Background>
+        <!-- Main grid rows and columns -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -32,17 +37,49 @@
             <RowDefinition Height="215"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
+        <!-- City tiles container -->
         <Border BorderBrush="#FF09C4D6" BorderThickness="0 0 0 1">
             <StackPanel  Width="2000" x:Name="spCities" Grid.Column="0" Grid.Row="0" Orientation="Horizontal" Height="215" VerticalAlignment="Top"/>
         </Border>
+        <!-- Hourly forecast start -->
         <StackPanel  Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" Orientation="Horizontal">
+            <TextBlock TextWrapping="NoWrap" Text="Hourly Forecast for" Foreground="White" FontWeight="Bold" FontSize="20" Margin="0,0,5,0"/>
+            <TextBlock x:Name="tblForecastCityNameHours" TextWrapping="NoWrap" Text="" Foreground="White" FontWeight="Bold" FontSize="20"/>
+        </StackPanel>
+        <Grid  x:Name="spForecastHours"  Grid.Column="0" Grid.Row="2" Margin="10,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
+        </Grid>
+        <!-- Hourly forecast end -->
+        
+        <!-- Daily forecast start -->
+        <StackPanel  Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center" Orientation="Horizontal">
             <TextBlock TextWrapping="NoWrap" Text="Daily Forecast for" Foreground="White" FontWeight="Bold" FontSize="20" Margin="0,0,5,0"/>
             <TextBlock x:Name="tblForecastCityName" TextWrapping="NoWrap" Text="" Foreground="White" FontWeight="Bold" FontSize="20"/>
         </StackPanel>
-
-        <Grid  x:Name="spForecastDays"  Grid.Column="0" Grid.Row="2" Margin="10,10">
+        <Grid  x:Name="spForecastDays"  Grid.Column="0" Grid.Row="4" Margin="10,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -56,14 +93,20 @@
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
         </Grid>
-        <StackPanel  Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center" Orientation="Horizontal" Margin="3">
+        <!-- Daily forecast end -->
+        <!-- Status updates -->
+        <StackPanel  Grid.Column="0" Grid.Row="5" HorizontalAlignment="Center" Orientation="Horizontal" Margin="3">
             <TextBlock TextWrapping="NoWrap" Text="Last updated at: " Foreground="White" FontWeight="Bold" FontSize="10"/>
             <TextBlock x:Name="tblForecastLastUpdated" TextWrapping="NoWrap" Text="" Foreground="White" FontWeight="Bold" FontSize="10"/>
         </StackPanel>
 
-        <Image x:Name="imgConnectionError" Visibility="Collapsed" HorizontalAlignment="Right"  Height="20" VerticalAlignment="Top" Width="20" Grid.Column="0" Grid.Row="3" Source="/Assets/noconnection.png"/>
-        <Image x:Name="imgLoading" Visibility="Collapsed" HorizontalAlignment="Right"  Height="20" VerticalAlignment="Top" Width="20" Grid.Column="0" Grid.Row="3" Source="/Assets/loading.gif"/>
+        <Image x:Name="imgConnectionError" Visibility="Collapsed" HorizontalAlignment="Right"  Height="20" VerticalAlignment="Top" Width="20" Grid.Column="0" Grid.Row="5" Source="/Assets/noconnection.png"/>
+        <Image x:Name="imgLoading" Visibility="Collapsed" HorizontalAlignment="Right"  Height="20" VerticalAlignment="Top" Width="20" Grid.Column="0" Grid.Row="5" Source="/Assets/loading.gif"/>
+        
+        
+        <!-- Fylouts -->
         <Rectangle Opacity="0.7" Fill="Black" Visibility="{Binding Visibility,ElementName=fpCitySearch}" Grid.RowSpan="4"/>
+        <!-- City search flyout -->
         <FlyoutPresenter  Width="330"
                          Height="500" x:Name="fpCitySearch"
                          Visibility="Collapsed" Margin="10"
@@ -95,7 +138,7 @@
 
         </FlyoutPresenter>
 
-
+        <!-- Tile settings flyout -->
         <FlyoutPresenter  Width="130"
                           Height="75"
                           x:Name="fpTileSettings"

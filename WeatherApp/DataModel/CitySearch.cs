@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WeatherApp.DataModel.Forecast12Hours;
 
 namespace WeatherApp.DataModel
 {
@@ -17,6 +18,7 @@ namespace WeatherApp.DataModel
         public AdministrativeArea AdministrativeArea { get; set; }
         public CityWeather Weather { get; set; }
         public Forecast5Day.Forecast5Day Forecast5Day { get; set; }
+        public List<HourlyForecast> Forecast12Hours { get; set; }
         public DateTime LastUpdated { get; set; }
     }
 

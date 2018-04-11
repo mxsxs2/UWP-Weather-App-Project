@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using WeatherApp.DataModel;
+using WeatherApp.DataModel.Forecast12Hours;
 using WeatherApp.DataModel.Forecast5Day;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -127,9 +128,8 @@ namespace WeatherApp
                         //If it is the first city then we need the forecast as well
                         if (index==0)
                         {
-                            //Load forecast for the default city. This will save to the storage as well
+                            //Load forecast for the default city. This will save to the storage as well and load the hourly forecast too
                             this.LoadForecastForCity(city);
-
                         }
                         else
                         {
@@ -242,12 +242,12 @@ namespace WeatherApp
             //Add to the parent stack panel
             spCities.Children.Add(panel);
         }
-        
+
 
         /// <summary>
-        /// Loads the forecast for a specific city
+        /// Loads 5 days and 12 hours forecast for city
         /// </summary>
-        /// <param name="cityKey"></param>
+        /// <param name="city"></param>
         private void LoadForecastForCity(City city)
         {
             //Set the loading image to visible
@@ -266,12 +266,16 @@ namespace WeatherApp
                     //Add timestamp to the city
                     city.LastUpdated = DateTime.Now;
                     //Loop the days
-                    for (int i=0; i<city.Forecast5Day.DailyForecasts.Count; i++)
+                    for (int i = 0; i < city.Forecast5Day.DailyForecasts.Count; i++)
                     {
                         this.AddDayPanel(city.Forecast5Day.DailyForecasts[i], i);
                     }
                     //Update the ui with the last updated time
                     tblForecastLastUpdated.Text = city.LastUpdated.ToString();
+
+                    //Load the hourly forecast. This will save the city to the storage
+                    this.LoadHourlyForecastForCity(city);
+
                     //Save the city to the storage
                     this.userDataStorage.SaveCity(city);
                     //Hide the loading image
@@ -293,9 +297,127 @@ namespace WeatherApp
                     imgConnectionError.Visibility = Visibility.Visible;
                     //Hide the loading image
                     imgLoading.Visibility = Visibility.Collapsed;
+                    return false;
+                });
+        }
+
+        /// <summary>
+        /// Loads the hourly forecast for a specific city
+        /// </summary>
+        /// <param name="cityKey"></param>
+        private void LoadHourlyForecastForCity(City city)
+        {
+            //Set the loading image to visible
+            imgLoading.Visibility = Visibility.Visible;
+            //Set the forecast city name
+            tblForecastCityNameHours.Text = city.LocalizedName;
+            //Hide connection error image
+            imgConnectionError.Visibility = Visibility.Collapsed;
+            //Load the city data
+            this.WAC.Get12HourForecastForCityAsync(city.Key,
+                (forecast) => {
+                    //Clear the storage grid
+                    spForecastHours.Children.Clear();
+                    //Add the forecast to the city
+                    city.Forecast12Hours = forecast;
+                    //Add timestamp to the city
+                    city.LastUpdated = DateTime.Now;
+                    //Loop the days
+                    for (int i = 0; i < city.Forecast12Hours.Count; i++)
+                    {
+                        this.AddHourPanel(city.Forecast12Hours[i], i);
+                    }
+                    //Update the ui with the last updated time
+                    tblForecastLastUpdated.Text = city.LastUpdated.ToString();
+                    //Save the city to the storage
+                    this.userDataStorage.SaveCity(city);
+                    //Hide the loading image
+                    imgLoading.Visibility = Visibility.Collapsed;
+                    return true;
+                },
+                (error) =>
+                {
+                    //Clear the storage grid
+                    spForecastHours.Children.Clear();
+                    //Loop the days and update with the old data
+                    for (int i = 0; i < city.Forecast12Hours.Count; i++)
+                    {
+                        this.AddHourPanel(city.Forecast12Hours[i], i);
+                    }
+                    //Update the ui with the last updated time
+                    tblForecastLastUpdated.Text = city.LastUpdated.ToString();
+                    //Show connection error image
+                    imgConnectionError.Visibility = Visibility.Visible;
+                    //Hide the loading image
+                    imgLoading.Visibility = Visibility.Collapsed;
                     return true;
                 });
         }
+
+        /// <summary>
+        /// Adds a day panel into the forecast grid
+        /// </summary>
+        /// <param name="day"></param>
+        /// <param name="col"></param>
+        private void AddHourPanel(HourlyForecast hour, int col)
+        {
+
+            //Get day name from epoch time
+            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dtDateTime = dtDateTime.AddSeconds(hour.EpochDateTime).ToLocalTime();
+            //Create day name
+            TextBlock tbn = new TextBlock
+            {
+                Text = dtDateTime.Day + "/" + dtDateTime.Hour + ":00",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 20,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
+            spForecastHours.Children.Add(tbn);
+            Grid.SetColumn(tbn, col);
+            Grid.SetRow(tbn, 0);
+
+            //Weather Picture
+            Image img = new Image
+            {
+                Source = new BitmapImage(new System.Uri("ms-appx:///Assets/icons/" + hour.WeatherIcon + ".png")),
+                Width = 60,
+                Height = 60
+            };
+            spForecastHours.Children.Add(img);
+            Grid.SetColumn(img, col);
+            Grid.SetRow(img, 1);
+            //Night
+            TextBlock tbni = new TextBlock
+            {
+                Text = hour.IconPhrase,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 15,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
+            spForecastHours.Children.Add(tbni);
+            Grid.SetColumn(tbni, col);
+            Grid.SetRow(tbni, 2);
+
+
+            //Add temperature
+            TextBlock tbt = new TextBlock
+            {
+                Text = Math.Round(hour.Temperature.Value) + "°C",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontSize = 25,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontWeight = FontWeights.Bold
+            };
+            spForecastHours.Children.Add(tbt);
+            Grid.SetColumn(tbt, col);
+            Grid.SetRow(tbt, 3);
+        }
+
 
         /// <summary>
         /// Loads the forecast for the given day when a tile is tapped
