@@ -111,6 +111,7 @@ namespace WeatherApp
         private void AddLocationTiles(List<City> cities)
         {
 
+
             //Clear the tile holder
             spCities.Children.Clear();
 
@@ -600,27 +601,67 @@ namespace WeatherApp
             fpCitySearch.Visibility = Visibility.Collapsed;
         }
 
-        private void tbxCitySearch_KeyDown(object sender, KeyRoutedEventArgs e)
+        private async void tbxCitySearch_KeyDown(object sender, KeyRoutedEventArgs e)
         {
+            //Hide error message
+            tblLocationDisabledMessage.Visibility = Visibility.Collapsed;
+            //Hide search error message
+            tblNoSearchResult.Visibility = Visibility.Collapsed;
+            //Hide unknown error message
+            tblUnknownError.Visibility = Visibility.Collapsed;
+            //Hide connection error image
+            imgConnectionError.Visibility = Visibility.Collapsed;
             //Cast the sender
             TextBox tb = (TextBox)sender;
             //Dont search unles there is atleast three characters
             if (tb.Text.Length > 2)
             {
-                //Load the cities
-                WAC.GetCityListByAutoComplete(tb.Text,
-                    (Cities) => {
-                        //Set the new city list
-                        this.cities = Cities;
-                        //Update the view
-                        lvCities.ItemsSource = Cities;
-                        return true;
-                    },
-                    (error) =>
+                //Set the loading image to visible
+                imgLoading.Visibility = Visibility.Visible;
+                //Run in a different thread so no blocking
+                await System.Threading.Tasks.Task.Run(async () =>
+                {
+                    //Cast the sender
+                    String searchstring="";
+                    //Has to get hold of the textbox from the UI
+                    await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                     {
-                        System.Diagnostics.Debug.WriteLine(error);
-                        return true;
+                        searchstring = tb.Text;
                     });
+                        //Load the cities
+                        WAC.GetCityListByAutoComplete(searchstring,
+                        (Cities) => {
+                            //Do the callback in UI thread
+                            IAsyncAction a = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                            {
+                                //Set the new city list
+                                this.cities = Cities;
+                                //Update the view
+                                lvCities.ItemsSource = Cities;
+                            });
+                            return true;
+                        },
+                        (error) =>
+                        {
+                            //Do the callback in UI thread
+                            IAsyncAction a = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                            {
+                                System.Diagnostics.Debug.WriteLine(error);
+                                //Hide the list view
+                                lvCities.Visibility = Visibility.Collapsed;
+                                //Show unknown error message
+                                tblUnknownError.Visibility = Visibility.Visible;
+                                //Hide the loading image
+                                imgLoading.Visibility = Visibility.Collapsed;
+                                //Show connection error image
+                                imgConnectionError.Visibility = Visibility.Visible;
+                            });
+                            return true;
+                        });
+
+                });
+
+                
             }
         }
         /// <summary>
@@ -796,7 +837,7 @@ namespace WeatherApp
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnUseLocation_Tapped(object sender, TappedRoutedEventArgs e)
+        private async void btnUseLocation_Tapped(object sender, TappedRoutedEventArgs e)
         {
             //Hide error message
             tblLocationDisabledMessage.Visibility = Visibility.Collapsed;
@@ -804,16 +845,22 @@ namespace WeatherApp
             tblNoSearchResult.Visibility = Visibility.Collapsed;
             //Hide unknown error message
             tblUnknownError.Visibility = Visibility.Collapsed;
-            //Get the location  
-            Location.GetLocation(
+            //Hide connection error image
+            imgConnectionError.Visibility = Visibility.Collapsed;
+            //Set the loading image to visible
+            imgLoading.Visibility = Visibility.Visible;
+            //Run in a different thread so no blocking
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                //Get the location  
+                Location.GetLocation(
                 (pos) =>
                 {
                     //Load a city from accu Weather
                     this.WAC.FindCityByCoordinates(pos,
                         (result) =>
                         {
-                            //Show the list view
-                            lvCities.Visibility = Visibility.Visible;
+
                             //Convert the result to City
                             City city = new City
                             {
@@ -831,31 +878,46 @@ namespace WeatherApp
                                     LocalizedName = result.Country.LocalizedName
                                 }
                             };
-                            //Add the city to the list
-                            this.cities = new List<City>
+
+                            //Do the callback in UI thread
+                            IAsyncAction a = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                             {
-                                city
-                            };
-                            //Place the city to the search result list view
-                            lvCities.ItemsSource = this.cities;
+                                //Add the city to the list
+                                this.cities = new List<City>
+                                {
+                                    city
+                                };
+                                //Show the list view
+                                lvCities.Visibility = Visibility.Visible;
+                                //Place the city to the search result list view
+                                lvCities.ItemsSource = this.cities;
+                            });
                             return true;
                         },
                         (err) =>
                         {
-                            //Hide the list view
-                            lvCities.Visibility = Visibility.Collapsed;
-                            //Show error message
-                            tblNoSearchResult.Visibility = Visibility.Visible;
+                            //Do the callback in UI thread
+                            IAsyncAction a = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                            {
+                                //Hide the list view
+                                lvCities.Visibility = Visibility.Collapsed;
+                                //Show error message
+                                tblNoSearchResult.Visibility = Visibility.Visible;
+                                //Hide the loading image
+                                imgLoading.Visibility = Visibility.Collapsed;
+                                //Show connection error image
+                                imgConnectionError.Visibility = Visibility.Visible;
+                            });
                             return true;
                         });
-                    
+
                     return true;
                 },
                 (err) =>
                 {
                     System.Diagnostics.Debug.WriteLine(err);
                     //Check if it is a permission error or it is an unknonwn error
-                    if (err== "Access to location is denied.")
+                    if (err == "Access to location is denied.")
                     {
                         //Show error message
                         tblLocationDisabledMessage.Visibility = Visibility.Visible;
@@ -869,10 +931,14 @@ namespace WeatherApp
                         //Show the list view
                         lvCities.Visibility = Visibility.Visible;
                     }
+                    //Hide the loading image
+                    imgLoading.Visibility = Visibility.Collapsed;
 
                     return true;
                 }
             );
+
+            });
         }
         #endregion
     }
