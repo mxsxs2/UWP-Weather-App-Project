@@ -162,8 +162,8 @@
                 </LinearGradientBrush>
             </FlyoutPresenter.Background>
             <StackPanel HorizontalAlignment="Left" Width="300">
-                <TextBlock Text="Remove" HorizontalAlignment="Left" x:Name="tblRemove" Foreground="White" FontWeight="Bold" FontSize="15" Tapped="tblRemove_Tapped" PointerEntered="SettingsText_PointerEntered" PointerExited="SettingsText_PointerExited"/>
                 <TextBlock Text="Set as default" HorizontalAlignment="Left" x:Name="tblSetDeafult" Foreground="White" FontWeight="Bold" FontSize="15" Tapped="tblSetDeafult_Tapped" PointerEntered="SettingsText_PointerEntered" PointerExited="SettingsText_PointerExited"/>
+                <TextBlock Text="Remove" HorizontalAlignment="Left" x:Name="tblRemove" Foreground="White" FontWeight="Bold" FontSize="15" Tapped="tblRemove_Tapped" PointerEntered="SettingsText_PointerEntered" PointerExited="SettingsText_PointerExited"/>
                 <TextBlock Text="Close" HorizontalAlignment="Left" x:Name="tblClose" Foreground="White" FontWeight="Bold" FontSize="15" Tapped="tblClose_Tapped" PointerEntered="SettingsText_PointerEntered" PointerExited="SettingsText_PointerExited"/>
             </StackPanel>
 
