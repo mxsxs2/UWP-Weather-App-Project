@@ -49,7 +49,9 @@ namespace WeatherApp
             //Load every city from csv
             //this.LoadCities();
             //Load user data from data storage
-            this.LoadUserData();
+            //this.LoadUserData();
+
+            this.AddCityAddingTile();
         }
 
         /// <summary>
@@ -632,6 +634,56 @@ namespace WeatherApp
             RelativePanel p = (RelativePanel)sender;
             p.Background = new SolidColorBrush(Colors.Aqua);
             Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Hand, 0);
+        }
+
+        /// <summary>
+        /// Tries to use the users location do get a city list from weather api
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnUseLocation_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            //Hide error message
+            tblLocationDisabledMessage.Visibility = Visibility.Collapsed;
+
+            //Get the location  
+            Location.GetLocation(
+                (pos) =>
+                {
+                    System.Diagnostics.Debug.WriteLine(pos.Coordinate.Point.Position.Latitude + " " + pos.Coordinate.Point.Position.Longitude);
+                    //Show the list view
+                    lvCities.Visibility = Visibility.Visible;
+                    return true;
+                },
+                (err) =>
+                {
+                    System.Diagnostics.Debug.WriteLine(err);
+                    //Check if it is a permission error or it is an unknonwn error
+                    if (err== "Access to location is denied.")
+                    {
+                        //Show error message
+                        tblLocationDisabledMessage.Visibility = Visibility.Visible;
+                        //Hide the list view
+                        lvCities.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        // Create the message dialog and set its content
+                        var messageDialog = new MessageDialog(err);
+                        // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
+                        messageDialog.Commands.Add(new UICommand("Close",command=> {
+
+                        }));
+                        // Show the message dialog
+                        messageDialog.ShowAsync();
+
+                        //Show the list view
+                        lvCities.Visibility = Visibility.Visible;
+                    }
+
+                    return true;
+                }
+            );
         }
     }
 }

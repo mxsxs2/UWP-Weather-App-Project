@@ -80,6 +80,14 @@
                       Height="300"
                       ItemTemplate="{StaticResource cityTemplate}">
                 </ListView>
+                <TextBlock x:Name="tblLocationDisabledMessage" FontStyle="Italic" Visibility="Collapsed" Margin="0,15,0,0" TextWrapping="Wrap" >
+                  <Run Text="This app is not able to access Location. Go to " />
+                      <Hyperlink NavigateUri="ms-settings:privacy-location">
+                          <Run Text="Settings" />
+                      </Hyperlink>
+                  <Run Text=" to check the location privacy settings."/>
+                </TextBlock>
+                <Button x:Name="btnUseLocation" Content="Use My Location" Tapped="btnUseLocation_Tapped" HorizontalAlignment="Stretch" Margin="0,5"/>
                 <Button x:Name="btnFlyoutClose" Content="Close" Tapped="btnFlyoutClose_Tapped" HorizontalAlignment="Stretch" Margin="0,5"/>
             </StackPanel>
 
