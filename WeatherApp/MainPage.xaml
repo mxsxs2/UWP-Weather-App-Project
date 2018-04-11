@@ -94,6 +94,13 @@
             </Grid.RowDefinitions>
         </Grid>
         <!-- Daily forecast end -->
+        <!-- Privacy Policy-->
+        <TextBlock Grid.Column="0" Grid.Row="5" Foreground="White" FontWeight="Bold" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <Hyperlink NavigateUri="https://drive.google.com/file/d/1ragZ436GKDDQH8hZNi0fMniuXm2vMPBi/view" FontFamily="Segoe UI" >
+                 <Run Text="Privacy Policy"  Foreground="White"/>
+            </Hyperlink>
+        </TextBlock>
+
         <!-- Status updates -->
         <StackPanel  Grid.Column="0" Grid.Row="5" HorizontalAlignment="Center" Orientation="Horizontal" Margin="3">
             <TextBlock TextWrapping="NoWrap" Text="Last updated at: " Foreground="White" FontWeight="Bold" FontSize="10"/>
