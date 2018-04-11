@@ -9,127 +9,110 @@ using Windows.Storage;
 
 namespace WeatherApp
 {
+    /// <summary>
+    /// Class used to store an opened StorageFile and wether it was newly created or not and the user data from the file
+    /// </summary>
+    public class OpenedFile
+    {
+        public StorageFile file { get; }
+        public bool newFile { get; }
+        public UserData userData { get; set; }
+
+        /// <summary>
+        /// Constructor for a new pened file
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="newFile"></param>
+        /// <param name="userData"></param>
+        public OpenedFile(StorageFile file, bool newFile, UserData userData)
+        {
+            this.file = file;
+            this.newFile = newFile;
+            this.userData = userData;
+        }
+        /// <summary>
+        /// Saves the user data to the opened file.
+        /// </summary>
+        /// <param name="userData"></param>
+        public async void Save(UserData userData = null)
+        {
+            //If there is an opened file and there is any user data
+            if (this.file != null && (userData ?? this.userData) != null)
+            {
+                try
+                {
+                    //Write the user data to the file
+                    await Windows.Storage.FileIO.WriteTextAsync(file, JsonConvert.SerializeObject(userData ?? this.userData));
+                }
+                catch (Exception e)
+                {
+                    //Check if it is used by another process
+                    if ("System.IO.FileLoadException" == e.GetType().ToString())
+                    {
+                        //Try to save again
+                        this.Save(userData ?? this.userData);
+                    }
+                    System.Diagnostics.Debug.WriteLine(e.Message + " " + e.GetType());
+                }
+            }
+        }
+
+
+    }
+    /// <summary>
+    /// Class to handle user storage
+    /// </summary>
     public class UserDataStorage
     {
         //The name of the data file 
         private string userDataFileName = "userDataFile.json";
 
-
-        /// <summary>
-        /// Saves a new city to the user storage
-        /// </summary>
-        /// <param name="city"></param>
-        public async void AddCity(City city)
-        {
-            //Create a user data holder
-            UserData ud = null;
-            //File holder
-            StorageFile file = null ;
-            
-            //If the storage file does not exists yet
-            if (await ApplicationData.Current.LocalFolder.TryGetItemAsync(this.userDataFileName) == null)
-            {
-                //Create new user data object
-                ud = new UserData();
-                //Create a new list
-                ud.cities = new List<City>(1);
-                //Add the city
-                ud.cities.Add(city);
-
-                //Create a new file
-                file = await ApplicationData.Current.LocalFolder.CreateFileAsync(this.userDataFileName);
-            }
-            else
-            {
-                //Load the file
-                StorageFile file2 = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
-                //Read the contents of the file
-                string fileContent=await Windows.Storage.FileIO.ReadTextAsync(file);
-                //Deserialize json 
-                ud= JsonConvert.DeserializeObject<UserData>(fileContent);
-                //Add the city
-                ud.cities.Add(city);
-            }
-
-            //If file and user data was created
-            if (ud != null && file!=null)
-            {
-                //Write the user data to the file
-                await Windows.Storage.FileIO.WriteTextAsync(file, JsonConvert.SerializeObject(ud));
-            }
-        }
-
-        /// <summary>
-        /// Removes a city from the storage
-        /// </summary>
-        /// <param name="city"></param>
-        public async void RemoveCity(City city)
-        {
-            //Load the file
-            StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
-            //Read the contents of the file
-            string fileContent = await Windows.Storage.FileIO.ReadTextAsync(file);
-            //Deserialize json 
-            UserData ud = JsonConvert.DeserializeObject<UserData>(fileContent);
-            //Find the city
-            for (int i = 0; i < ud.cities.Count; i++)
-            {
-                //If the two keys match then the city was found
-                if (ud.cities[i].Key == city.Key)
-                {
-                    //Remove the city
-                    ud.cities.RemoveAt(i);
-                    break;
-                }
-            }
-
-            this.SaveUserData(ud);
-        }
-
-
-        public async void SetCityAsDefault(City city)
-        {
-            //Load the file
-            StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
-            //Read the contents of the file
-            string fileContent = await Windows.Storage.FileIO.ReadTextAsync(file);
-            //Deserialize json 
-            UserData ud = JsonConvert.DeserializeObject<UserData>(fileContent);
-            //Find the city
-            for (int i = 0; i < ud.cities.Count; i++)
-            {
-                //If the two keys match then the city was found
-                if (ud.cities[i].Key == city.Key)
-                {
-                    //Remove the city
-                    ud.cities.RemoveAt(i);
-                    //Add the city as first item
-                    ud.cities.Insert(0, city);
-                    break;
-                }
-            }
-
-            this.SaveUserData(ud);
-        }
-
         /// <summary>
         /// Loads the user data json file from the application storage
         /// </summary>
         /// <param name="callBack"></param>
-        public async void LoadData(Func<UserData,bool> callBack)
+        public async void LoadData(Func<UserData, bool> callBack)
         {
-            //Create a user data holder
-            UserData ud = null;
+            //Run in a different thread so no blocking
+            await System.Threading.Tasks.Task.Run(async () =>
+            {
+                //Open the file
+                OpenedFile of = await this.GetFile();
+
+                //Do the callback in UI thread
+                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
+                    callBack(of.userData);
+                });
+
+            });
+        }
+
+        /// <summary>
+        /// Gets the storage file. If it is not created yet then it will create one
+        /// </summary>
+        /// <returns></returns>
+        private async Task<OpenedFile> GetFile()
+        {
             //File holder
             StorageFile file = null;
-            System.Diagnostics.Debug.WriteLine(ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName));
+            //Wether it is a new file or not
+            bool newFile = false;
+            //The user data to return
+            UserData ud = null;
             //If the storage file does not exists yet
             if (await ApplicationData.Current.LocalFolder.TryGetItemAsync(this.userDataFileName) == null)
             {
+                //Create a new file
+                file = await ApplicationData.Current.LocalFolder.CreateFileAsync(this.userDataFileName);
+                //Set the flag as the file is new
+                newFile = true;
                 //Create new user data object
-                ud = new UserData();
-                //Create a new list
-                ud.cities = new List<City>(0);
+                ud = new UserData
+                {
+                    //Create a new list
+                    cities = new List<City>(0)
+                };
+
             }
             else
             {
@@ -140,89 +123,117 @@ namespace WeatherApp
                 //Deserialize json 
                 ud = JsonConvert.DeserializeObject<UserData>(fileContent);
             }
-            //Do the callback
-            callBack(ud);
+            return new OpenedFile(file, newFile, ud);
         }
 
         /// <summary>
-        /// Saves a a city's full data to the storage
+        /// Removes a city from the storage
+        /// </summary>
+        /// <param name="city"></param>
+        public async void RemoveCity(City city)
+        {
+            //Run in a different thread so no blocking
+            await System.Threading.Tasks.Task.Run(async () =>
+            {
+                //Open the file
+                OpenedFile of = await this.GetFile();
+                //Check if the city exists in the list
+                int index = this.FindCity(of.userData, city);
+                //If it exists
+                if (index != -1)
+                {
+                    //Remove the city
+                    of.userData.cities.RemoveAt(index);
+                    //Save the user data
+                    of.Save();
+                }
+            });
+        }
+
+        /// <summary>
+        /// Saves a city as default city by moving it to the first position
+        /// </summary>
+        /// <param name="city"></param>
+        public async void SetCityAsDefault(City city)
+        {
+            //Run in a different thread so no blocking
+            await System.Threading.Tasks.Task.Run(async () => {
+                //Open the file
+                OpenedFile of = await this.GetFile();
+                //Check if the city exists in the list
+                int index = this.FindCity(of.userData, city);
+                //If it exists
+                if (index != -1)
+                {
+                    //If the two keys match then the city was found
+                    if (of.userData.cities[index].Key == city.Key)
+                    {
+                        //Remove the city
+                        of.userData.cities.RemoveAt(index);
+                        //Add the city as first item
+                        of.userData.cities.Insert(0, city);
+                        //Save the user data
+                        of.Save();
+                    }
+                }
+
+            });
+        }
+
+        /// <summary>
+        /// Saves a city's full data to the storage
         /// </summary>
         /// <param name="city"></param>
         public async void SaveCity(City city)
         {
             System.Diagnostics.Debug.WriteLine(ApplicationData.Current.LocalFolder.Path);
-
-           //Load the file
-           StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
-            //Read the contents of the file
-            string fileContent = await Windows.Storage.FileIO.ReadTextAsync(file);
-            //Deserialize json 
-            UserData ud = JsonConvert.DeserializeObject<UserData>(fileContent);
-            //Check if the city exists
-            bool foundCity = false;
-            //Find the city
-            for (int i = 0; i<ud.cities.Count; i++)
+            //Run in a different thread so no blocking
+            await System.Threading.Tasks.Task.Run(async () =>
             {
-                //If the two keys match then the city was found
-                if (ud.cities[i].Key == city.Key)
+                //Open the file
+                OpenedFile of = await this.GetFile();
+                //Check if the city exists in the list
+                int index = this.FindCity(of.userData, city);
+                //If it exists
+                if (index != -1)
                 {
                     //Override the city data
-                    ud.cities[i] = city;
-                    //Set the flag
-                    foundCity = true;
-                    break;
+                    of.userData.cities[index] = city;
                 }
-            }
-            //If the city was not found
-            if (!foundCity)
-            {
-                //Add the city to the list
-                ud.cities.Add(city);
-            }
+                else
+                {
+                    //Add the city to the list
+                    of.userData.cities.Add(city);
+                }
 
-            this.SaveUserData(ud);
+                //Save the user data
+                of.Save();
+            });
         }
 
         /// <summary>
-        /// Saves the user data into the storage file. If the file does not exists, the function will create one.
+        /// Checks if the city exists in the user data. If it does, returns the index of the city otherwise -1
         /// </summary>
-        /// <param name="ud"></param>
-        private async void SaveUserData(UserData ud)
+        /// <param name="userData"></param>
+        /// <param name="city"></param>
+        /// <returns></returns>
+        private int FindCity(UserData userData, City city)
         {
-            //File holder
-            StorageFile file = null;
-
-            //If the storage file does not exists yet
-            if (await ApplicationData.Current.LocalFolder.TryGetItemAsync(this.userDataFileName) == null)
+            //If there is any data to check against
+            if (userData != null && userData.cities != null && userData.cities.Count > 0)
             {
-                //Create a new file
-                file = await ApplicationData.Current.LocalFolder.CreateFileAsync(this.userDataFileName);
-            }
-            else
-            {
-                //Load the file
-                file = await ApplicationData.Current.LocalFolder.GetFileAsync(this.userDataFileName);
-            }
-
-            //If file and user data was created
-            if (ud != null && file != null)
-            {
-                try
+                //Find the city
+                for (int i = 0; i < userData.cities.Count; i++)
                 {
-                    //Write the user data to the file
-                    await Windows.Storage.FileIO.WriteTextAsync(file, JsonConvert.SerializeObject(ud));
-                }
-                catch(Exception e)
-                {
-                    //Check if it is used by another process
-                    if("System.IO.FileLoadException"== e.GetType().ToString())
+                    //If the two keys match then the city was found
+                    if (userData.cities[i].Key == city.Key)
                     {
-                        //Try to save again
-                        this.SaveUserData(ud);
+                        return i;
                     }
-                    System.Diagnostics.Debug.WriteLine(e.Message+" "+e.GetType() );
                 }
             }
+            //Not found
+            return -1;
         }
     }
 }
