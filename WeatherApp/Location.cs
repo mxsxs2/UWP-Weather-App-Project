@@ -18,8 +18,6 @@ namespace WeatherApp
             switch (accessStatus)
             {
                 case GeolocationAccessStatus.Allowed:
-                    //_rootPage.NotifyUser("Waiting for update...", NotifyType.StatusMessage);
-
                     // If DesiredAccuracy or DesiredAccuracyInMeters are not set (or value is 0), DesiredAccuracy.Default is used.
                     Geolocator geolocator = new Geolocator {};
 

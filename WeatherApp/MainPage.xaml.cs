@@ -46,12 +46,8 @@ namespace WeatherApp
         public MainPage()
         {
             this.InitializeComponent();
-            //Load every city from csv
-            //this.LoadCities();
             //Load user data from data storage
-            //this.LoadUserData();
-
-            this.AddCityAddingTile();
+            this.LoadUserData();
         }
 
         /// <summary>
@@ -645,14 +641,55 @@ namespace WeatherApp
         {
             //Hide error message
             tblLocationDisabledMessage.Visibility = Visibility.Collapsed;
-
+            //Hide search error message
+            tblNoSearchResult.Visibility = Visibility.Collapsed;
+            //Hide unknown error message
+            tblUnknownError.Visibility = Visibility.Collapsed;
             //Get the location  
             Location.GetLocation(
                 (pos) =>
                 {
-                    System.Diagnostics.Debug.WriteLine(pos.Coordinate.Point.Position.Latitude + " " + pos.Coordinate.Point.Position.Longitude);
-                    //Show the list view
-                    lvCities.Visibility = Visibility.Visible;
+                    //Load a city from accu Weather
+                    this.WAC.FindCityByCoordinates(pos,
+                        (result) =>
+                        {
+                            //Show the list view
+                            lvCities.Visibility = Visibility.Visible;
+                            //Convert the result to City
+                            City city = new City
+                            {
+                                Version = result.Version,
+                                Key = result.Key,
+                                Type = result.Type,
+                                Rank = result.Rank,
+                                LocalizedName = result.LocalizedName,
+                                AdministrativeArea = new AdministrativeArea {
+                                    ID = result.AdministrativeArea.ID,
+                                    LocalizedName = result.AdministrativeArea.LocalizedName
+                                },
+                                Country = new Country {
+                                    ID = result.Country.ID,
+                                    LocalizedName = result.Country.LocalizedName
+                                }
+                            };
+                            //Add the city to the list
+                            this.cities = new List<City>
+                            {
+                                city
+                            };
+                            //Place the city to the search result list view
+                            lvCities.ItemsSource = this.cities;
+                            return true;
+                        },
+                        (err) =>
+                        {
+                            //Hide the list view
+                            lvCities.Visibility = Visibility.Collapsed;
+                            //Show error message
+                            tblNoSearchResult.Visibility = Visibility.Visible;
+                            return true;
+                        });
+                    
                     return true;
                 },
                 (err) =>
@@ -668,15 +705,8 @@ namespace WeatherApp
                     }
                     else
                     {
-                        // Create the message dialog and set its content
-                        var messageDialog = new MessageDialog(err);
-                        // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
-                        messageDialog.Commands.Add(new UICommand("Close",command=> {
-
-                        }));
-                        // Show the message dialog
-                        messageDialog.ShowAsync();
-
+                        //Show unknown error message
+                        tblUnknownError.Visibility = Visibility.Visible;
                         //Show the list view
                         lvCities.Visibility = Visibility.Visible;
                     }

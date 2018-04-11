@@ -87,6 +87,8 @@
                       </Hyperlink>
                   <Run Text=" to check the location privacy settings."/>
                 </TextBlock>
+                <TextBlock x:Name="tblNoSearchResult" Text="Could not find a city for the given criteria" FontStyle="Italic" Visibility="Collapsed" Margin="0,15,0,0" TextWrapping="Wrap"/>
+                <TextBlock x:Name="tblUnknownError" Text="Unknown Error. Please try again later." FontStyle="Italic" Visibility="Collapsed" Margin="0,15,0,0" TextWrapping="Wrap"/>
                 <Button x:Name="btnUseLocation" Content="Use My Location" Tapped="btnUseLocation_Tapped" HorizontalAlignment="Stretch" Margin="0,5"/>
                 <Button x:Name="btnFlyoutClose" Content="Close" Tapped="btnFlyoutClose_Tapped" HorizontalAlignment="Stretch" Margin="0,5"/>
             </StackPanel>
