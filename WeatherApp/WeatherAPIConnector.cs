@@ -16,13 +16,9 @@ using WeatherApp.DataModel.GeoSearch;
 
 namespace WeatherApp
 {
-    public class DataObject
-    {
-        public string Name { get; set; }
-    }
-
-
-
+    /// <summary>
+    /// Class that maps to Acuweather's API
+    /// </summary>
     class WeatherAPIConnector
     {
         //Api key to connect to accuweather.com
@@ -49,24 +45,19 @@ namespace WeatherApp
             };
 
             // Add an Accept header for JSON format.
-            client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Do the http response call with the query string and api key
             HttpResponseMessage response = client.GetAsync("?"+queries+ "&metric=true&apikey=" + apiKey).Result;
             //If the response code is 200
             if (response.IsSuccessStatusCode)
             {
-                
                 //Convert the response to string
                 string resp=await response.Content.ReadAsStringAsync();
-                //System.Diagnostics.Debug.WriteLine(resp);
                 //Serialize the json string into T type
                 T data = JsonConvert.DeserializeObject<T>(resp);
-                //System.Diagnostics.Debug.WriteLine("asd");
                 //Return the data
                 return data;
-
             }
             else
             {
@@ -76,6 +67,12 @@ namespace WeatherApp
             throw new Exception(response.ReasonPhrase);
         }
 
+        /// <summary>
+        /// Loads all the cities which starts with the fiven string
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="successCallBack"></param>
+        /// <param name="errorCallBack"></param>
         public async void GetCityListByAutoComplete(string search, Func<List<City>, bool> successCallBack, Func<string, bool> errorCallBack)
         {
             try
@@ -89,10 +86,6 @@ namespace WeatherApp
                 errorCallBack(e.Message);
             }
         }
-
-
-
-
 
         /// <summary>
         /// Loads the weather information for a city
