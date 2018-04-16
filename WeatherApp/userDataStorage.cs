@@ -93,6 +93,7 @@ namespace WeatherApp
         /// <returns></returns>
         private async Task<OpenedFile> GetFile()
         {
+            System.Diagnostics.Debug.WriteLine(ApplicationData.Current.LocalFolder.Path);
             //File holder
             StorageFile file = null;
             //Wether it is a new file or not
@@ -122,6 +123,23 @@ namespace WeatherApp
                 string fileContent = await Windows.Storage.FileIO.ReadTextAsync(file);
                 //Deserialize json 
                 ud = JsonConvert.DeserializeObject<UserData>(fileContent);
+                //Check if the file is empty
+                if (ud == null)
+                {
+                    //Create new user data object
+                    ud = new UserData
+                    {
+                        //Create a new list
+                        cities = new List<City>(0)
+                    };
+                }
+                //Check if the city list is null
+                else if(ud.cities==null)
+                {
+                    //Create a new list
+                    ud.cities = new List<City>(0);
+                }
+
             }
             return new OpenedFile(file, newFile, ud);
         }
@@ -186,7 +204,6 @@ namespace WeatherApp
         /// <param name="city"></param>
         public async void SaveCity(City city)
         {
-            System.Diagnostics.Debug.WriteLine(ApplicationData.Current.LocalFolder.Path);
             //Run in a different thread so no blocking
             await System.Threading.Tasks.Task.Run(async () =>
             {

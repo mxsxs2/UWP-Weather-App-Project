@@ -65,6 +65,13 @@ namespace WeatherApp
                 this.userCities = data.cities;
                 //Load the city tiles from the user data
                 this.AddLocationTiles(this.userCities);
+                //If there is atleast one user city
+                if (this.userCities.Count() > 0)
+                {
+                    //Show the labels
+                    this.ToggleLabels();
+                }
+
                 return true;
             });
             
@@ -267,6 +274,26 @@ namespace WeatherApp
 
         #region ForecastLoaders
         /// <summary>
+        /// Makes the forecast labels and the last updated time visible
+        /// </summary>
+        private void ToggleLabels()
+        {
+            //If they are hidden
+            if (stplDailyForecastLabel.Visibility == Visibility.Collapsed)
+            {
+                stplDailyForecastLabel.Visibility = Visibility.Visible;
+                stplHourlyForecastLabel.Visibility = Visibility.Visible;
+                stplLastUpdated.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                stplDailyForecastLabel.Visibility = Visibility.Collapsed;
+                stplHourlyForecastLabel.Visibility = Visibility.Collapsed;
+                stplLastUpdated.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
         /// Loads 5 days and 12 hours forecast for city
         /// </summary>
         /// <param name="city"></param>
@@ -282,7 +309,7 @@ namespace WeatherApp
             this.WAC.Get5DayForecastForCityAsync(city.Key,
                 (forecast) => {
                     //Clear the storage grid
-                    spForecastDays.Children.Clear();
+                    grdForecastDays.Children.Clear();
                     //Add the forecast to the city
                     city.Forecast5Day = forecast;
                     //Add timestamp to the city
@@ -298,8 +325,8 @@ namespace WeatherApp
                     //Load the hourly forecast. This will save the city to the storage
                     this.LoadHourlyForecastForCity(city);
 
-                    //Save the city to the storage
-                    this.userDataStorage.SaveCity(city);
+                    //Save the city to the storage. The previous method will save it
+                    //this.userDataStorage.SaveCity(city);
                     //Hide the loading image
                     imgLoading.Visibility = Visibility.Collapsed;
                     return true;
@@ -307,7 +334,7 @@ namespace WeatherApp
                 (error) =>
                 {
                     //Clear the storage grid
-                    spForecastDays.Children.Clear();
+                    grdForecastDays.Children.Clear();
                     //Loop the days and update with the old data
                     for (int i = 0; i < city.Forecast5Day.DailyForecasts.Count; i++)
                     {
@@ -339,7 +366,7 @@ namespace WeatherApp
             this.WAC.Get12HourForecastForCityAsync(city.Key,
                 (forecast) => {
                     //Clear the storage grid
-                    spForecastHours.Children.Clear();
+                    grdForecastHours.Children.Clear();
                     //Add the forecast to the city
                     city.Forecast12Hours = forecast;
                     //Add timestamp to the city
@@ -360,7 +387,7 @@ namespace WeatherApp
                 (error) =>
                 {
                     //Clear the storage grid
-                    spForecastHours.Children.Clear();
+                    grdForecastHours.Children.Clear();
                     //Loop the days and update with the old data
                     for (int i = 0; i < city.Forecast12Hours.Count; i++)
                     {
@@ -399,7 +426,7 @@ namespace WeatherApp
                 Foreground = new SolidColorBrush(Colors.White),
                 FontWeight = FontWeights.Bold
             };
-            spForecastHours.Children.Add(tbn);
+            grdForecastHours.Children.Add(tbn);
             Grid.SetColumn(tbn, col);
             Grid.SetRow(tbn, 0);
 
@@ -410,7 +437,7 @@ namespace WeatherApp
                 Width = 60,
                 Height = 60
             };
-            spForecastHours.Children.Add(img);
+            grdForecastHours.Children.Add(img);
             Grid.SetColumn(img, col);
             Grid.SetRow(img, 1);
             //Night
@@ -423,7 +450,7 @@ namespace WeatherApp
                 Foreground = new SolidColorBrush(Colors.White),
                 FontWeight = FontWeights.Bold
             };
-            spForecastHours.Children.Add(tbni);
+            grdForecastHours.Children.Add(tbni);
             Grid.SetColumn(tbni, col);
             Grid.SetRow(tbni, 2);
 
@@ -437,7 +464,7 @@ namespace WeatherApp
                 Foreground = new SolidColorBrush(Colors.White),
                 FontWeight = FontWeights.Bold
             };
-            spForecastHours.Children.Add(tbt);
+            grdForecastHours.Children.Add(tbt);
             Grid.SetColumn(tbt, col);
             Grid.SetRow(tbt, 3);
         }
@@ -463,7 +490,7 @@ namespace WeatherApp
                 Foreground = new SolidColorBrush(Colors.White),
                 FontWeight = FontWeights.Bold
             };
-            spForecastDays.Children.Add(tbn);
+            grdForecastDays.Children.Add(tbn);
             Grid.SetColumn(tbn, col);
             Grid.SetRow(tbn, 0);
 
@@ -481,7 +508,7 @@ namespace WeatherApp
             };
             panel.Children.Add(dayPanel);
             panel.Children.Add(nightPanel);
-            spForecastDays.Children.Add(panel);
+            grdForecastDays.Children.Add(panel);
             Grid.SetColumn(panel, col);
             Grid.SetRow(panel, 1);
             //Day
@@ -531,7 +558,7 @@ namespace WeatherApp
                 Foreground = new SolidColorBrush(Colors.White),
                 FontWeight = FontWeights.Bold
             };
-            spForecastDays.Children.Add(tbt);
+            grdForecastDays.Children.Add(tbt);
             Grid.SetColumn(tbt, col);
             Grid.SetRow(tbt, 2);
         }
@@ -580,14 +607,23 @@ namespace WeatherApp
         /// <param name="e"></param>
         private void StackPanel_Tapped(object sender, TappedRoutedEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine("tapped");
+
             //Add the city to the user data storage
             //this.userDataStorage.AddCity(this.cities[lvCities.SelectedIndex]);
+            this.userDataStorage.SaveCity(this.cities[lvCities.SelectedIndex]);
             //Add city to the memory storage
             this.userCities.Add(this.cities[lvCities.SelectedIndex]);
             //Rerender the user city tiles
             this.AddLocationTiles(this.userCities);
             //Close the fylout
             this.btnFlyoutClose_Tapped(fpCitySearch, e);
+            //If there this is the first city added
+            if (this.userCities.Count() == 1)
+            {
+                //Show the labels
+                this.ToggleLabels();
+            }
         }
 
         /// <summary>
@@ -638,6 +674,8 @@ namespace WeatherApp
                                 this.cities = Cities;
                                 //Update the view
                                 lvCities.ItemsSource = Cities;
+                                //Hide the loading image
+                                imgLoading.Visibility = Visibility.Collapsed;
                             });
                             return true;
                         },
@@ -780,6 +818,19 @@ namespace WeatherApp
                 this.userCities.RemoveAt(this.cityIndexForSettings);
                 //Re do the tiles
                 this.AddLocationTiles(this.userCities);
+                //If there is nothing left in thelist
+                if (this.userCities.Count() < 1)
+                {
+                    this.ToggleLabels();
+                    //Clear the forecast
+                    grdForecastDays.Children.Clear();
+                    grdForecastHours.Children.Clear();
+                }
+                else
+                {
+                    //Load the forecast for the default city
+                    this.LoadForecastForCity(this.userCities[0]);
+                }
             }
 
             //Close the flyout
