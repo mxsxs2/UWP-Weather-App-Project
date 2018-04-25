@@ -1,5 +1,5 @@
 # UWP-Weather-App-Project
-Weather app project for MOBILE APPLICATIONS DEVELOPMENT 2 College module
+Weather app project for MOBILE APPLICATIONS DEVELOPMENT 2 College module. The project was created in Visual Studio 2017
 ## What is it?
 A Universal Windows Platform(UWP) application written in C#. The purpose of this app is to show weather details to the user. It is using Accuweather.com API to get the latest weather information.
 ## Why will the user open this app for a second time?
